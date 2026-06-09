@@ -75,8 +75,36 @@
       box-shadow: var(--shadow);
     }
     .header-logo { font-size: 1.15rem; font-weight: 800; color: var(--accent); letter-spacing: -.5px; flex-shrink: 0; }
-    .header-sync { margin-left: auto; font-size: .75rem; color: var(--muted); flex-shrink: 0; }
-    .header-sync span { font-weight: 600; }
+    .header-sync { margin-left: auto; display: flex; align-items: center; gap: .6rem; flex-shrink: 0; }
+    .header-sync-time { font-size: .75rem; color: var(--muted); }
+    .header-sync-time span { font-weight: 600; }
+
+    /* ── Sync Button ──────────────────────────────────────────── */
+    .sync-btn {
+      display: flex; align-items: center; gap: .35rem;
+      padding: .35rem .7rem; border-radius: 7px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--muted); font-size: .78rem; font-weight: 600;
+      cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+      font-family: var(--font);
+    }
+    .sync-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-lt); }
+    .sync-btn:disabled { opacity: .55; cursor: not-allowed; }
+    .sync-icon { font-size: .9rem; display: inline-block; transition: transform .3s; }
+    .sync-btn.syncing .sync-icon { animation: spin .7s linear infinite; }
+
+    /* ── Toast ────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(6px);
+      background: var(--text); color: #fff; padding: .6rem 1.1rem;
+      border-radius: 8px; font-size: .82rem; font-weight: 500;
+      box-shadow: var(--shadow-md); opacity: 0;
+      transition: opacity .2s, transform .2s; pointer-events: none;
+      white-space: nowrap; z-index: 9000;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.success { background: var(--green); }
+    #toast.error   { background: var(--red); }
 
     /* ── DB Tabs ───────────────────────────────────────────── */
     .db-tabs { display: flex; gap: .25rem; }
@@ -298,8 +326,15 @@
       <button class="db-tab"        data-db="content" onclick="switchDB('content')">Content</button>
       <button class="db-tab"        data-db="roadmap" onclick="switchDB('roadmap')">Roadmap</button>
     </nav>
-    <div class="header-sync">Synced: <span id="sync-time">—</span></div>
+    <div class="header-sync">
+      <div class="header-sync-time">Synced: <span id="sync-time">—</span></div>
+      <button class="sync-btn" id="sync-btn" onclick="triggerSync()" title="Sync Notion → GitHub">
+        <span class="sync-icon">↺</span> Sync
+      </button>
+    </div>
   </header>
+
+  <div id="toast"></div>
 
   <main id="main-content"></main>
 </div>
@@ -309,8 +344,17 @@
    CONFIG — edit these
 ══════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  password: "bch2024",          // ← change this passphrase
+  password: "bch2026",          // ← change this passphrase
   sessionKey: "bch_unlocked",
+
+  // GitHub Actions sync — fill in to enable the Sync button
+  github: {
+    owner:    "zoom2408",      // ← your GitHub username or org
+    repo:     "BCH",          // ← repository name
+    workflow: "notion-sync.yml",    // ← workflow file name
+    branch:   "main",               // ← branch to dispatch from
+    token:    "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",                   // ← GitHub PAT with `workflow` scope (keep secret!)
+  },
 
   databases: {
     tasks:   { label: "Tasks",    file: "data/tasks.json",   statusField: "status", dateField: "dueDate" },
@@ -738,6 +782,67 @@ function fmtDate(str) {
 }
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SYNC — triggers GitHub Actions workflow_dispatch
+══════════════════════════════════════════════════════════════ */
+async function triggerSync() {
+  const { owner, repo, workflow, branch, token } = CONFIG.github;
+
+  if (!token) {
+    showToast("Add your GitHub token to CONFIG.github.token", "error");
+    return;
+  }
+  if (owner === "YOUR_USERNAME" || repo === "YOUR_REPO") {
+    showToast("Set CONFIG.github owner & repo first", "error");
+    return;
+  }
+
+  const btn = document.getElementById("sync-btn");
+  btn.disabled = true;
+  btn.classList.add("syncing");
+
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ref: branch }),
+      }
+    );
+
+    if (res.status === 204) {
+      showToast("Sync triggered — data will refresh in ~1 min", "success");
+      // Reload data after 75 s to pick up the new commit
+      setTimeout(() => loadAllData(), 75000);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      showToast(`GitHub error: ${data.message || res.status}`, "error");
+    }
+  } catch (e) {
+    showToast("Network error — check console", "error");
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("syncing");
+  }
+}
+
+/* ── Toast helper ──────────────────────────────────────────── */
+let _toastTimer;
+function showToast(msg, type = "") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "show" + (type ? ` ${type}` : "");
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { el.className = ""; }, 3500);
 }
 </script>
 </body>

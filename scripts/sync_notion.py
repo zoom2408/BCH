@@ -261,7 +261,7 @@ def main():
             continue
         try:
             data = sync_database(token, db_id, label, fmap)
-            write_json(f"data/{key}.json", data)
+            write_json(f"tracker/data/{key}.json", data)
         except Exception as e:
             print(f"  ✗ Failed: {e}", file=sys.stderr)
             errors.append(key)

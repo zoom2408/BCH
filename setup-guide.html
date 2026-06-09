@@ -230,9 +230,33 @@
   <div class="guide-header">
     <div class="guide-logo">BCH</div>
     <div class="guide-title">Tracker Setup Guide</div>
-    <div class="guide-sub">Follow each step in order. Check it off when done and the next step opens automatically.</div>
+    <div class="guide-sub">Both your MVP and tracker live in the same repo — follow each step in order and check it off when done.</div>
     <div class="progress-wrap"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="progress-label" id="progress-label">0 of 8 steps complete</div>
+  </div>
+
+  <!-- Repo structure overview -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.85rem">📁 How your repo will be organised</div>
+    <div style="font-family:var(--mono);font-size:.82rem;line-height:2">
+      <div><span style="color:var(--accent);font-weight:700">BCH/</span> <span style="color:var(--muted);font-size:.75rem">(repo root)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── <span style="color:var(--text);font-weight:600">index.html</span> <span style="font-size:.73rem">← your existing MVP (untouched)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── README.md</div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── <span style="color:var(--accent);font-weight:700">tracker/</span></div>
+      <div style="padding-left:2.75rem;color:var(--muted)">├── <span style="color:var(--text)">index.html</span> <span style="font-size:.73rem">← tracker app</span></div>
+      <div style="padding-left:2.75rem;color:var(--muted)">├── setup-guide.html</div>
+      <div style="padding-left:2.75rem;color:var(--muted)">└── <span style="color:var(--text)">data/</span> <span style="font-size:.73rem">← Notion JSON written here</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── scripts/ <span style="font-size:.73rem">← sync scripts (repo root)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">└── .github/workflows/ <span style="font-size:.73rem">← GitHub Action (must be root)</span></div>
+    </div>
+    <div style="display:flex;gap:1.25rem;margin-top:1rem;flex-wrap:wrap">
+      <div style="background:var(--accent-lt);border-radius:8px;padding:.5rem .9rem;font-size:.78rem">
+        🌐 <b>MVP URL:</b> <code style="font-size:.78rem">zoom2408.github.io/BCH</code>
+      </div>
+      <div style="background:var(--green-lt);border-radius:8px;padding:.5rem .9rem;font-size:.78rem">
+        📊 <b>Tracker URL:</b> <code style="font-size:.78rem">zoom2408.github.io/BCH/tracker</code>
+      </div>
+    </div>
   </div>
 
   <!-- ══ STEP 1 ══════════════════════════════════════════════════ -->
@@ -480,8 +504,8 @@ Step 4 — Add These GitHub Secrets
     <div class="step-header" onclick="toggleStep(5)">
       <div class="step-num"><span class="step-num-inner">5</span></div>
       <div class="step-info">
-        <div class="step-title">Push the Tracker to GitHub</div>
-        <div class="step-meta">Upload all files to your repo</div>
+        <div class="step-title">Add Tracker to Your Existing Repo</div>
+        <div class="step-meta">Clone BCH, copy files in, push — MVP stays untouched</div>
       </div>
       <span class="step-badge badge-terminal">💻 Terminal</span>
       <span class="step-chevron">▶</span>
@@ -489,39 +513,61 @@ Step 4 — Add These GitHub Secrets
     <div class="step-body">
       <div class="info-box tip">
         <span class="info-box-icon">💡</span>
-        <div class="info-box-text">Run these commands one at a time in the same Terminal window, still inside the <code>tracker/</code> folder.</div>
+        <div class="info-box-text">You already have a repo at <b>github.com/zoom2408/BCH</b>. We'll clone it, add the tracker files inside a <code>tracker/</code> subfolder, and push. Your existing MVP is not touched.</div>
       </div>
 
-      <h4>Initialise git and commit</h4>
+      <h4>① Clone your existing repo</h4>
       <div class="code-block">
-        <pre><span class="cmd">git</span> init
-<span class="cmd">git</span> add .
-<span class="cmd">git</span> commit -m "init: BCH tracker"</pre>
-        <button class="copy-btn" onclick="copyCode(this, 'git init\ngit add .\ngit commit -m \"init: BCH tracker\"')">Copy</button>
+        <pre><span class="cmd">cd</span> ~/Desktop
+<span class="cmd">git</span> clone https://github.com/zoom2408/BCH.git BCH-repo
+<span class="cmd">cd</span> BCH-repo</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'cd ~/Desktop\ngit clone https://github.com/zoom2408/BCH.git BCH-repo\ncd BCH-repo')">Copy</button>
       </div>
 
-      <h4>Connect to GitHub and push</h4>
-      <div class="instruction">
-        <div class="instruction-num">1</div>
-        <div class="instruction-text">Go to your GitHub repo in the browser → copy the commands shown under <b>"…or push an existing repository"</b></div>
-      </div>
-      <div class="instruction">
-        <div class="instruction-num">2</div>
-        <div class="instruction-text">They look like this — replace <code>YOUR_USERNAME</code> and <code>YOUR_REPO</code>:</div>
-      </div>
+      <h4>② Create the tracker subfolder and copy files</h4>
       <div class="code-block">
-        <pre><span class="cmd">git</span> remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-<span class="cmd">git</span> branch -M main
-<span class="cmd">git</span> push -u origin main</pre>
-        <button class="copy-btn" onclick="copyCode(this, 'git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git\ngit branch -M main\ngit push -u origin main')">Copy</button>
+        <pre><span class="comment"># Create the tracker/ subfolder</span>
+<span class="cmd">mkdir</span> -p tracker/data
+
+<span class="comment"># Copy tracker HTML and data files into tracker/</span>
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/index.html" tracker/
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/setup-guide.html" tracker/
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/data/"*.json tracker/data/
+
+<span class="comment"># Copy scripts and .github to repo root (needed for GitHub Action)</span>
+<span class="cmd">cp</span> -R "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts" .
+<span class="cmd">cp</span> -R "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.github" .
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.gitignore" .</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'mkdir -p tracker/data\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/index.html\" tracker/\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/setup-guide.html\" tracker/\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/data/\"*.json tracker/data/\ncp -R \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts\" .\ncp -R \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.github\" .\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.gitignore\" .')">Copy</button>
+      </div>
+
+      <h4>③ Confirm the structure looks right</h4>
+      <div class="code-block">
+        <pre><span class="cmd">ls</span> -la          <span class="comment"># should show: tracker/ scripts/ .github/ .gitignore + your existing files</span>
+<span class="cmd">ls</span> tracker/     <span class="comment"># should show: index.html  setup-guide.html  data/</span>
+<span class="cmd">ls</span> tracker/data <span class="comment"># should show: tasks.json  content.json  roadmap.json</span></pre>
+        <button class="copy-btn" onclick="copyCode(this, 'ls -la\nls tracker/\nls tracker/data')">Copy</button>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-box-icon">⚠️</span>
+        <div class="info-box-text"><b>If <code>ls -la</code> does NOT show your existing MVP file</b> — that's fine, it might be named <code>index.html</code> at the root. Check with <code>ls</code> and confirm it's there before pushing.</div>
+      </div>
+
+      <h4>④ Commit and push</h4>
+      <div class="code-block">
+        <pre><span class="cmd">git</span> add .
+<span class="cmd">git</span> commit -m "add: BCH tracker in tracker/ subfolder"
+<span class="cmd">git</span> push</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'git add .\ngit commit -m \"add: BCH tracker in tracker/ subfolder\"\ngit push')">Copy</button>
       </div>
 
       <div class="info-box tip">
         <span class="info-box-icon">💡</span>
-        <div class="info-box-text">If prompted for a GitHub password, use a <b>Personal Access Token</b>, not your account password. Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> with <code>repo</code> scope.</div>
+        <div class="info-box-text">If prompted for a GitHub password, use a <b>Personal Access Token</b> — not your account password. Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> with <code>repo</code> scope checked.</div>
       </div>
 
-      <button class="done-btn" onclick="markDone(5)">✓ Files pushed to GitHub — mark done</button>
+      <button class="done-btn" onclick="markDone(5)">✓ Files pushed — I can see tracker/ in the GitHub repo — mark done</button>
     </div>
   </div>
 
@@ -620,7 +666,7 @@ Step 4 — Add These GitHub Secrets
       <h4>Change the passphrase first (optional but recommended)</h4>
       <div class="instruction">
         <div class="instruction-num">1</div>
-        <div class="instruction-text">Open <code>tracker/index.html</code> in any text editor (TextEdit, VS Code, etc.)</div>
+        <div class="instruction-text">Open <code>~/Desktop/BCH-repo/tracker/index.html</code> in any text editor (TextEdit, VS Code, etc.)</div>
       </div>
       <div class="instruction">
         <div class="instruction-num">2</div>
@@ -638,29 +684,221 @@ Step 4 — Add These GitHub Secrets
         <div class="instruction-text">Save the file, then in Terminal push the change:</div>
       </div>
       <div class="code-block">
-        <pre><span class="cmd">cd</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker"
-<span class="cmd">git</span> add index.html
+        <pre><span class="cmd">cd</span> ~/Desktop/BCH-repo
+<span class="cmd">git</span> add tracker/index.html
 <span class="cmd">git</span> commit -m "update passphrase"
 <span class="cmd">git</span> push</pre>
-        <button class="copy-btn" onclick="copyCode(this, 'cd \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker\"\ngit add index.html\ngit commit -m \"update passphrase\"\ngit push')">Copy</button>
+        <button class="copy-btn" onclick="copyCode(this, 'cd ~/Desktop/BCH-repo\ngit add tracker/index.html\ngit commit -m \"update passphrase\"\ngit push')">Copy</button>
       </div>
 
       <h4>Open the tracker</h4>
       <div class="instruction">
         <div class="instruction-num">4</div>
-        <div class="instruction-text">Go to <code>https://YOUR_USERNAME.github.io/YOUR_REPO</code></div>
+        <div class="instruction-text">Your <b>two URLs</b> are now live:</div>
       </div>
+
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin:.75rem 0 .75rem 2rem">
+        <div style="background:var(--accent-lt);border-radius:8px;padding:.6rem 1rem;font-size:.85rem">
+          🌐 <b>MVP:</b> <a href="https://zoom2408.github.io/BCH" target="_blank">zoom2408.github.io/BCH</a>
+        </div>
+        <div style="background:var(--green-lt);border-radius:8px;padding:.6rem 1rem;font-size:.85rem">
+          📊 <b>Tracker:</b> <a href="https://zoom2408.github.io/BCH/tracker" target="_blank">zoom2408.github.io/BCH/tracker</a>
+        </div>
+      </div>
+
       <div class="instruction">
         <div class="instruction-num">5</div>
-        <div class="instruction-text">Enter your passphrase → you should see your Notion data in Dashboard, Kanban, and Calendar views</div>
+        <div class="instruction-text">Open the Tracker URL → enter your passphrase → you should see your Notion data in Dashboard, Kanban, and Calendar views</div>
       </div>
 
       <div class="info-box success">
         <span class="info-box-icon">🎉</span>
-        <div class="info-box-text"><b>You're live!</b> Sync runs every 30 min automatically. Add items in Notion and they'll appear in the tracker within 30 minutes (or trigger a manual sync anytime from the Actions tab).</div>
+        <div class="info-box-text"><b>You're live!</b> Both pages are up. Sync runs every 30 min automatically — add items in Notion and they appear in the tracker within 30 minutes.</div>
       </div>
 
       <button class="done-btn" onclick="markDone(8)">✓ Tracker is live and working — mark done!</button>
+    </div>
+  </div>
+
+  <!-- ══ TROUBLESHOOTING ══════════════════════════════════════════ -->
+  <div style="margin-top:2rem">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">🔧 Troubleshooting</div>
+
+    <!-- T1: Tracker shows 0 items -->
+    <div class="step warning" id="trouble-1">
+      <div class="step-header" onclick="toggleTrouble(1)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Tracker shows 0 items / dashboard is empty</div>
+          <div class="step-meta">Sync ran (green ✓) but data/<em>x</em>.json has <code>"total": 0, "items": []</code></div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <div class="info-box warn">
+          <span class="info-box-icon">⚠️</span>
+          <div class="info-box-text"><b>Root cause:</b> The DB ID saved in GitHub Secrets is pointing to the wrong database (or the parent page instead of the database itself). The API connects fine but returns 0 rows.</div>
+        </div>
+
+        <h4>Step 1 — Get the correct DB ID from Notion</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Open the database in Notion — click <b>into the Tasks database itself</b> (not just the parent page)</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Look at the browser URL bar. It will look like one of these:</div>
+        </div>
+
+        <div class="code-block">
+          <pre><span class="comment"># Format 1 — long URL with page name:</span>
+https://www.notion.so/Tasks-<span style="color:#fbbf24">b36f625eaddd1815695b8e3fd8fb9f23</span>
+                              <span style="color:#a3e635">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+                              <span style="color:#a3e635">← this 32-char string is your DB ID</span>
+
+<span class="comment"># Format 2 — just the ID:</span>
+https://www.notion.so/<span style="color:#fbbf24">b36f625e-addd-1815-695b-8e3fd8fb9f23</span></pre>
+        </div>
+
+        <div class="instruction">
+          <div class="instruction-num">3</div>
+          <div class="instruction-text">Copy the <b>32 characters after the last <code>-</code> before any <code>?</code></b>. Dashes are optional — both formats work.</div>
+        </div>
+
+        <div class="info-box danger">
+          <span class="info-box-icon">🚫</span>
+          <div class="info-box-text">
+            <b>Don't copy the parent page URL.</b> The parent page (e.g. "BCH Workspace") has its own ID — it's NOT the database ID. Make sure the URL says the database name (Tasks, Content Calendar, Roadmap) in the browser tab before copying.
+          </div>
+        </div>
+
+        <h4>Step 2 — Verify with a quick Terminal test</h4>
+        <div class="info-box tip">
+          <span class="info-box-icon">💡</span>
+          <div class="info-box-text">Run this to confirm the ID is correct before updating GitHub. Replace the values with yours.</div>
+        </div>
+        <div class="code-block">
+          <pre><span class="cmd">NOTION_TOKEN</span>="secret_xxx" <span class="cmd">TASKS_DB_ID</span>="your-db-id" python3 -c "
+import urllib.request, json, os
+t = os.environ['NOTION_TOKEN']
+d = os.environ['TASKS_DB_ID']
+req = urllib.request.Request(
+    f'https://api.notion.com/v1/databases/{d}/query',
+    data=b'{}',
+    headers={'Authorization': f'Bearer {t}',
+             'Notion-Version': '2022-06-28',
+             'Content-Type': 'application/json'},
+    method='POST'
+)
+with urllib.request.urlopen(req) as r:
+    data = json.loads(r.read())
+    print(f'Found {len(data[\"results\"])} rows')
+"</pre>
+          <button class="copy-btn" onclick="copyCode(this, 'NOTION_TOKEN=\"secret_xxx\" TASKS_DB_ID=\"your-db-id\" python3 -c \"\nimport urllib.request, json, os\nt = os.environ[\'NOTION_TOKEN\']\nd = os.environ[\'TASKS_DB_ID\']\nreq = urllib.request.Request(\n    f\'https://api.notion.com/v1/databases/{d}/query\',\n    data=b\'{}\',\n    headers={\'Authorization\': f\'Bearer {t}\', \'Notion-Version\': \'2022-06-28\', \'Content-Type\': \'application/json\'},\n    method=\'POST\'\n)\nwith urllib.request.urlopen(req) as r:\n    data = json.loads(r.read())\n    print(f\'Found {len(data[\"results\"])} rows\')\n\"')">Copy</button>
+        </div>
+        <div class="ui-mock">
+          <div class="ui-mock-label">Expected output</div>
+          <div class="ui-mock-row highlight">Found 3 rows &nbsp;← ✓ correct ID</div>
+          <div class="ui-mock-row muted-row" style="margin-top:.3rem">Found 0 rows &nbsp;← ✗ wrong ID or integration not connected</div>
+        </div>
+
+        <h4>Step 3 — Update the GitHub Secret</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to your GitHub repo → <b>Settings → Secrets and variables → Actions</b></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Click the secret name (e.g. <code>TASKS_DB_ID</code>) → click <b>"Update"</b> → paste the correct ID → save</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">3</div>
+          <div class="instruction-text">Repeat for <code>CONTENT_DB_ID</code> and <code>ROADMAP_DB_ID</code> if needed</div>
+        </div>
+
+        <h4>Step 4 — Also check the database integration connection</h4>
+        <div class="info-box tip">
+          <span class="info-box-icon">💡</span>
+          <div class="info-box-text">Each <b>database</b> needs to have the integration connected separately — not just the parent page. Open each database → <b>··· → Connections → BCH Tracker</b>. Do this for all 3.</div>
+        </div>
+
+        <h4>Step 5 — Re-run the sync</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">GitHub repo → <b>Actions</b> tab → "Sync Notion → JSON" → <b>Run workflow</b></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">After it completes (green ✓), open <code>tracker/data/tasks.json</code> in the repo — <code>"total"</code> should now be greater than 0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T2: Integration not connected -->
+    <div class="step warning" id="trouble-2" style="margin-top:.75rem">
+      <div class="step-header" onclick="toggleTrouble(2)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Script fails with HTTP 400 / "page not found"</div>
+          <div class="step-meta">setup_notion_databases.py returns a validation error</div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <div class="info-box danger">
+          <span class="info-box-icon">🚫</span>
+          <div class="info-box-text"><b>Cause:</b> The integration is not connected to the parent page. You connected via Share → Invite instead of <b>··· → Connections</b>.</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to your Notion parent page → click <b>···</b> (top right) → <b>Connections</b> → click <b>BCH Tracker</b> to connect it</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Re-run: <code>python3 scripts/setup_notion_databases.py</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T3: Token lost -->
+    <div class="step warning" id="trouble-3" style="margin-top:.75rem">
+      <div class="step-header" onclick="toggleTrouble(3)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Lost your NOTION_TOKEN / DB IDs after closing Terminal</div>
+          <div class="step-meta">Where to find them again without re-running the setup script</div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <h4>Recover NOTION_TOKEN</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Click <b>BCH Tracker</b> → click <b>"Show"</b> next to the token field → copy it</div>
+        </div>
+        <div class="info-box warn">
+          <span class="info-box-icon">⚠️</span>
+          <div class="info-box-text">If you've lost the token and can't recover it, click <b>"Regenerate"</b> to get a new one — then update the <code>NOTION_TOKEN</code> GitHub Secret with the new value.</div>
+        </div>
+
+        <h4>Recover DB IDs</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Open the setup script output file: <code>tracker/scripts/.env.notion</code> — the IDs were saved there automatically when you ran the script</div>
+        </div>
+        <div class="code-block">
+          <pre><span class="cmd">cat</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts/.env.notion"</pre>
+          <button class="copy-btn" onclick="copyCode(this, 'cat \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts/.env.notion\"')">Copy</button>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text"><b>Or</b> get each ID directly from Notion: open the database → copy the 32-char ID from the URL (see the "0 items" troubleshooting section above)</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -721,6 +959,11 @@ Step 4 — Add These GitHub Secrets
       btn.classList.add('copied');
       setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
     });
+  }
+
+  function toggleTrouble(n) {
+    const el = document.getElementById('trouble-' + n);
+    el.classList.toggle('open');
   }
 
   // Restore state on load
