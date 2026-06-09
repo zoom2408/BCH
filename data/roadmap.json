@@ -1,0 +1,13 @@
+{
+  "lastSync": "2026-06-08T10:00:00Z",
+  "items": [
+    { "id": "r1", "title": "MVP: Core tracker HTML", "status": "Done", "priority": "High", "targetDate": "2026-06-07", "assignee": "Linh", "tags": ["MVP", "Frontend"], "url": "" },
+    { "id": "r2", "title": "Notion API integration", "status": "In Progress", "priority": "High", "targetDate": "2026-06-12", "assignee": "Linh", "tags": ["MVP", "Backend"], "url": "" },
+    { "id": "r3", "title": "GitHub Pages deploy", "status": "Planned", "priority": "High", "targetDate": "2026-06-14", "assignee": "Linh", "tags": ["MVP", "Infra"], "url": "" },
+    { "id": "r4", "title": "Multi-database tabs", "status": "Done", "priority": "High", "targetDate": "2026-06-07", "assignee": "Linh", "tags": ["v1.0", "Frontend"], "url": "" },
+    { "id": "r5", "title": "Calendar view", "status": "Done", "priority": "Medium", "targetDate": "2026-06-07", "assignee": "Linh", "tags": ["v1.0", "Frontend"], "url": "" },
+    { "id": "r6", "title": "Mobile responsive layout", "status": "Planned", "priority": "Medium", "targetDate": "2026-06-20", "assignee": "Linh", "tags": ["v1.1", "Frontend"], "url": "" },
+    { "id": "r7", "title": "Dark mode toggle", "status": "To Do", "priority": "Low", "targetDate": "2026-07-01", "assignee": "Linh", "tags": ["v1.2", "Frontend"], "url": "" },
+    { "id": "r8", "title": "Slack notifications on overdue", "status": "To Do", "priority": "Low", "targetDate": "2026-07-15", "assignee": "Linh", "tags": ["v2.0", "Integrations"], "url": "" }
+  ]
+}

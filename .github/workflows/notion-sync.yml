@@ -1,0 +1,78 @@
+# ─────────────────────────────────────────────────────────────────
+# REUSABLE SKILL: notion-to-json-sync
+# ─────────────────────────────────────────────────────────────────
+# Fetches Notion databases on a schedule and commits the resulting
+# JSON files back to the repo so GitHub Pages always serves fresh data.
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   NOTION_TOKEN    — your Notion integration token
+#   TASKS_DB_ID     — Notion database ID (Tasks)
+#   CONTENT_DB_ID   — Notion database ID (Content Calendar)
+#   ROADMAP_DB_ID   — Notion database ID (Product Roadmap)
+#
+# How to get a Notion database ID:
+#   Open the database in Notion → Share → Copy link
+#   URL format: notion.so/{workspace}/{DATABASE_ID}?v=...
+#   The 32-char hex string before the `?` is the ID.
+#
+# How to create a Notion integration:
+#   1. Go to https://www.notion.so/my-integrations
+#   2. Create integration → copy the "Internal Integration Token"
+#   3. Open each database in Notion → "..." menu → Connections → add your integration
+# ─────────────────────────────────────────────────────────────────
+
+name: Sync Notion → JSON
+
+on:
+  # Run automatically on a schedule
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes — adjust as needed
+
+  # Allow manual trigger from GitHub UI (Actions → Run workflow)
+  workflow_dispatch:
+
+# Prevent overlapping runs
+concurrency:
+  group: notion-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Fetch Notion & commit JSON
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to commit data files back
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # Use a token so the commit can trigger GitHub Pages rebuild
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run sync script
+        env:
+          NOTION_TOKEN:   ${{ secrets.NOTION_TOKEN }}
+          TASKS_DB_ID:    ${{ secrets.TASKS_DB_ID }}
+          CONTENT_DB_ID:  ${{ secrets.CONTENT_DB_ID }}
+          ROADMAP_DB_ID:  ${{ secrets.ROADMAP_DB_ID }}
+        run: python scripts/sync_notion.py
+
+      - name: Commit updated data files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          # Only commit if there are actual changes
+          if git diff --cached --quiet; then
+            echo "No data changes — skipping commit."
+          else
+            git commit -m "chore: sync Notion data [skip ci]"
+            git push
+          fi
