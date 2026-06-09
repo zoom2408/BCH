@@ -2,6 +2,7 @@
 .env*
 *.env
 .env.notion
+token.js
 
 # Python
 __pycache__/
