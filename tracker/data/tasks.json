@@ -1,15 +1,5 @@
 {
-  "lastSync": "2026-06-08T10:00:00Z",
-  "items": [
-    { "id": "1", "title": "Set up project repo on GitHub", "status": "Done", "priority": "High", "dueDate": "2026-06-01", "assignee": "Linh", "tags": ["Setup", "Dev"], "url": "" },
-    { "id": "2", "title": "Design tracker wireframes", "status": "Done", "priority": "High", "dueDate": "2026-06-03", "assignee": "Linh", "tags": ["Design"], "url": "" },
-    { "id": "3", "title": "Write Notion sync script", "status": "In Progress", "priority": "High", "dueDate": "2026-06-10", "assignee": "Linh", "tags": ["Dev", "Notion"], "url": "" },
-    { "id": "4", "title": "Configure GitHub Actions workflow", "status": "In Progress", "priority": "Medium", "dueDate": "2026-06-11", "assignee": "Linh", "tags": ["Dev", "CI/CD"], "url": "" },
-    { "id": "5", "title": "Add password gate to tracker", "status": "Done", "priority": "Medium", "dueDate": "2026-06-05", "assignee": "Linh", "tags": ["Dev", "Security"], "url": "" },
-    { "id": "6", "title": "Test calendar view on mobile", "status": "To Do", "priority": "Low", "dueDate": "2026-06-15", "assignee": "Linh", "tags": ["Testing", "Mobile"], "url": "" },
-    { "id": "7", "title": "Write setup documentation", "status": "To Do", "priority": "Low", "dueDate": "2026-06-18", "assignee": "Linh", "tags": ["Docs"], "url": "" },
-    { "id": "8", "title": "Deploy to GitHub Pages", "status": "Blocked", "priority": "High", "dueDate": "2026-06-08", "assignee": "Linh", "tags": ["Dev", "Deploy"], "url": "" },
-    { "id": "9", "title": "Map Notion property types", "status": "Done", "priority": "High", "dueDate": "2026-06-04", "assignee": "Linh", "tags": ["Dev", "Notion"], "url": "" },
-    { "id": "10", "title": "Review kanban UX with team", "status": "In Review", "priority": "Medium", "dueDate": "2026-06-12", "assignee": "Linh", "tags": ["Design", "Review"], "url": "" }
-  ]
+  "lastSync": "2026-06-09T15:38:32Z",
+  "total": 0,
+  "items": []
 }

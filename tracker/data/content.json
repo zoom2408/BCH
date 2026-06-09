@@ -1,12 +1,5 @@
 {
-  "lastSync": "2026-06-08T10:00:00Z",
-  "items": [
-    { "id": "c1", "title": "BCH Launch Announcement", "status": "Published", "priority": "High", "publishDate": "2026-06-01", "assignee": "Linh", "tags": ["Launch", "Blog"], "url": "" },
-    { "id": "c2", "title": "How We Built Our Tracker", "status": "Draft", "priority": "Medium", "publishDate": "2026-06-15", "assignee": "Linh", "tags": ["Blog", "Dev"], "url": "" },
-    { "id": "c3", "title": "June Newsletter", "status": "In Progress", "priority": "High", "publishDate": "2026-06-20", "assignee": "Linh", "tags": ["Newsletter", "Email"], "url": "" },
-    { "id": "c4", "title": "Product Roadmap Post", "status": "Scheduled", "priority": "Medium", "publishDate": "2026-06-25", "assignee": "Linh", "tags": ["Blog", "Roadmap"], "url": "" },
-    { "id": "c5", "title": "Social: Feature Teaser Series", "status": "In Progress", "priority": "Medium", "publishDate": "2026-06-10", "assignee": "Linh", "tags": ["Social", "Marketing"], "url": "" },
-    { "id": "c6", "title": "Case Study: First Customer", "status": "Draft", "priority": "Low", "publishDate": "2026-07-05", "assignee": "Linh", "tags": ["Case Study", "Blog"], "url": "" },
-    { "id": "c7", "title": "Tutorial: Notion Integration Setup", "status": "To Do", "priority": "Low", "publishDate": "2026-07-10", "assignee": "Linh", "tags": ["Tutorial", "Blog"], "url": "" }
-  ]
+  "lastSync": "2026-06-09T15:38:32Z",
+  "total": 0,
+  "items": []
 }
