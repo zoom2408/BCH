@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
   <title>BCH Tracker</title>
   <style>
     /* ── Reset & Variables ─────────────────────────────────── */
@@ -427,7 +429,7 @@ async function loadAllData() {
   const keys = Object.keys(CONFIG.databases);
   await Promise.all(keys.map(async key => {
     try {
-      const res = await fetch(CONFIG.databases[key].file + "?t=" + Date.now());
+      const res = await fetch(CONFIG.databases[key].file + "?t=" + Date.now(), { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       state.data[key] = await res.json();
     } catch (e) {
