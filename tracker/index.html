@@ -788,6 +788,37 @@ function escHtml(s) {
 /* ══════════════════════════════════════════════════════════════
    SYNC — triggers GitHub Actions workflow_dispatch
 ══════════════════════════════════════════════════════════════ */
+function getSnapshotLastSync() {
+  const db = state.data[state.currentDB];
+  return db && db.lastSync ? db.lastSync : null;
+}
+
+let _pollTimer = null;
+function pollForUpdate(prevLastSync, attempts = 0) {
+  const MAX = 20;   // 20 × 15s = 5 minutes
+  const INTERVAL = 15000;
+
+  clearTimeout(_pollTimer);
+  if (attempts >= MAX) {
+    showToast("Sync may have failed — check GitHub Actions", "error");
+    document.getElementById("sync-btn").disabled = false;
+    document.getElementById("sync-btn").classList.remove("syncing");
+    return;
+  }
+
+  _pollTimer = setTimeout(async () => {
+    await loadAllData();
+    const cur = getSnapshotLastSync();
+    if (cur && cur !== prevLastSync) {
+      showToast("Synced successfully", "success");
+      document.getElementById("sync-btn").disabled = false;
+      document.getElementById("sync-btn").classList.remove("syncing");
+    } else {
+      pollForUpdate(prevLastSync, attempts + 1);
+    }
+  }, INTERVAL);
+}
+
 function getGHToken() {
   // 1. Local dev: gitignored token.js sets window.BCH_GH_TOKEN
   // 2. Deployed: persisted in localStorage after first entry
@@ -827,11 +858,12 @@ async function triggerSync() {
     );
 
     if (res.status === 204) {
-      showToast("Sync triggered — data will refresh in ~1 min", "success");
-      setTimeout(() => loadAllData(), 75000);
+      showToast("Syncing… checking for updates", "success");
+      // polling will re-enable the button when done (or on timeout)
+      pollForUpdate(getSnapshotLastSync());
+      return;
     } else {
       const data = await res.json().catch(() => ({}));
-      // If 401/403, clear stored token so user can re-enter
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("bch_gh_token");
       }
@@ -840,10 +872,9 @@ async function triggerSync() {
   } catch (e) {
     showToast("Network error — check console", "error");
     console.error(e);
-  } finally {
-    btn.disabled = false;
-    btn.classList.remove("syncing");
   }
+  btn.disabled = false;
+  btn.classList.remove("syncing");
 }
 
 /* ── Toast helper ──────────────────────────────────────────── */
