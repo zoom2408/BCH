@@ -339,6 +339,8 @@
   <main id="main-content"></main>
 </div>
 
+<!-- loads gitignored token.js when running locally; silently absent on GitHub Pages -->
+<script src="../token.js" onerror=""></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
    CONFIG — edit these
@@ -347,13 +349,12 @@ const CONFIG = {
   password: "bch2026",          // ← change this passphrase
   sessionKey: "bch_unlocked",
 
-  // GitHub Actions sync — fill in to enable the Sync button
+  // GitHub Actions sync
   github: {
-    owner:    "zoom2408",      // ← your GitHub username or org
-    repo:     "BCH",          // ← repository name
-    workflow: "notion-sync.yml",    // ← workflow file name
-    branch:   "main",               // ← branch to dispatch from
-    token:    "ghp_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",                   // ← GitHub PAT with `workflow` scope (keep secret!)
+    owner:    "zoom2408",
+    repo:     "BCH",
+    workflow: "notion-sync.yml",
+    branch:   "main",
   },
 
   databases: {
@@ -787,16 +788,23 @@ function escHtml(s) {
 /* ══════════════════════════════════════════════════════════════
    SYNC — triggers GitHub Actions workflow_dispatch
 ══════════════════════════════════════════════════════════════ */
-async function triggerSync() {
-  const { owner, repo, workflow, branch, token } = CONFIG.github;
+function getGHToken() {
+  // 1. Local dev: gitignored token.js sets window.BCH_GH_TOKEN
+  // 2. Deployed: persisted in localStorage after first entry
+  return (typeof window.BCH_GH_TOKEN !== "undefined" && window.BCH_GH_TOKEN)
+    || localStorage.getItem("bch_gh_token")
+    || "";
+}
 
+async function triggerSync() {
+  const { owner, repo, workflow, branch } = CONFIG.github;
+
+  let token = getGHToken();
   if (!token) {
-    showToast("Add your GitHub token to CONFIG.github.token", "error");
-    return;
-  }
-  if (owner === "YOUR_USERNAME" || repo === "YOUR_REPO") {
-    showToast("Set CONFIG.github owner & repo first", "error");
-    return;
+    const input = prompt("Enter GitHub PAT (needs workflow scope):");
+    if (!input) return;
+    token = input.trim();
+    localStorage.setItem("bch_gh_token", token);
   }
 
   const btn = document.getElementById("sync-btn");
@@ -820,10 +828,13 @@ async function triggerSync() {
 
     if (res.status === 204) {
       showToast("Sync triggered — data will refresh in ~1 min", "success");
-      // Reload data after 75 s to pick up the new commit
       setTimeout(() => loadAllData(), 75000);
     } else {
       const data = await res.json().catch(() => ({}));
+      // If 401/403, clear stored token so user can re-enter
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("bch_gh_token");
+      }
       showToast(`GitHub error: ${data.message || res.status}`, "error");
     }
   } catch (e) {
