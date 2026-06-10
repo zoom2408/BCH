@@ -3,6 +3,7 @@
 *.env
 .env.notion
 token.js
+**/token.js
 
 # Python
 __pycache__/

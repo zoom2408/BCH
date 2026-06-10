@@ -1,744 +1,1423 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BCH Tracker</title>
-  <style>
-    /* ── Reset & Variables ─────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bạn Cùng Học — Học Đúng. Nhớ Lâu.</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f4ef; --ink: #1a1814; --surface: #fff;
+  --surface2: #f0ece4; --border: #ddd8cc; --border2: #c8c0b0;
+  --muted: #9a9080; --muted2: #6a6050;
+  --green: #1e4d38; --green-bg: #eaf4ee; --green-mid: #2d7a58;
+  --green-border: #aed4c0; --green-text: #143628;
+  --blue: #2a3f72; --blue-bg: #edf0f9; --blue-mid: #3d5fba;
+  --blue-border: #b0c0e4; --blue-text: #1a2848;
+  --purple: #5c2d70; --purple-bg: #f4eefa; --purple-mid: #8a4ab0;
+  --purple-border: #d0b0e4; --purple-text: #3a1a48;
+  --gold: #c07818; --gold-bg: #fdf5e4; --gold-border: #e8d090;
+  --red: #b83c20; --red-bg: #fdf0ea;
+  --r: 10px; --sh: 0 2px 12px rgba(26,24,20,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.72;min-height:100vh;}
 
-    :root {
-      --bg:        #f5f6fa;
-      --surface:   #ffffff;
-      --border:    #e2e5ef;
-      --text:      #1a1d2e;
-      --muted:     #6b7280;
-      --accent:    #6366f1;
-      --accent-lt: #eef2ff;
-      --green:     #10b981;
-      --green-lt:  #ecfdf5;
-      --amber:     #f59e0b;
-      --amber-lt:  #fffbeb;
-      --red:       #ef4444;
-      --red-lt:    #fef2f2;
-      --blue:      #3b82f6;
-      --blue-lt:   #eff6ff;
-      --gray:      #9ca3af;
-      --gray-lt:   #f9fafb;
-      --radius:    10px;
-      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-      --shadow-md: 0 4px 12px rgba(0,0,0,.08);
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    }
+/* NAV */
+.topbar{position:sticky;top:0;z-index:300;background:rgba(247,244,239,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;height:50px;gap:0;}
+.brand{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;margin-right:24px;white-space:nowrap;}
+.brand em{font-style:italic;font-weight:400;color:var(--green-mid);}
+.nav-links{display:flex;height:100%;flex:1;overflow-x:auto;}
+.nav-link{background:none;border:none;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:400;color:var(--muted);padding:0 16px;cursor:pointer;height:100%;transition:all .15s;white-space:nowrap;}
+.nav-link:hover{color:var(--ink);}
+.nav-link.active{color:var(--ink);font-weight:500;border-bottom-color:var(--ink);}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
+.btn-sm{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:5px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.btn-outline{background:none;border:1px solid var(--border2);color:var(--ink);}
+.btn-outline:hover{background:var(--surface);}
+.btn-primary{background:var(--ink);border:1px solid var(--ink);color:#f0e8d0;}
+.btn-primary:hover{background:#2a2620;}
 
-    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+/* VIEWS */
+.view{display:none;}.view.active{display:block;}
+.container{max-width:1080px;margin:0 auto;padding:64px 32px 100px;}
+.container-narrow{max-width:760px;margin:0 auto;padding:56px 32px 100px;}
 
-    /* ── Password Gate ─────────────────────────────────────── */
-    #gate {
-      position: fixed; inset: 0; z-index: 9999;
-      background: linear-gradient(135deg, #1a1d2e 0%, #2d2f47 100%);
-      display: flex; align-items: center; justify-content: center;
-    }
-    #gate.hidden { display: none; }
-    .gate-card {
-      background: #fff; border-radius: 16px; padding: 2.5rem 2rem;
-      width: 100%; max-width: 360px; text-align: center;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-    }
-    .gate-logo { font-size: 2rem; font-weight: 800; letter-spacing: -1px; color: var(--accent); margin-bottom: .25rem; }
-    .gate-sub  { color: var(--muted); font-size: .875rem; margin-bottom: 1.75rem; }
-    .gate-card input {
-      width: 100%; padding: .75rem 1rem; border: 1.5px solid var(--border);
-      border-radius: var(--radius); font-size: .95rem; font-family: var(--font);
-      outline: none; transition: border-color .15s;
-      text-align: center; letter-spacing: .15em;
-    }
-    .gate-card input:focus { border-color: var(--accent); }
-    .gate-card button {
-      margin-top: .75rem; width: 100%; padding: .75rem;
-      background: var(--accent); color: #fff; border: none;
-      border-radius: var(--radius); font-size: .95rem; font-weight: 600;
-      cursor: pointer; transition: opacity .15s;
-    }
-    .gate-card button:hover { opacity: .88; }
-    #gate-error { margin-top: .6rem; color: var(--red); font-size: .82rem; min-height: 1.1em; }
+/* BACK LINK */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;margin-bottom:32px;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .15s;}
+.back-link:hover{color:var(--ink);}
 
-    /* ── App Shell ─────────────────────────────────────────── */
-    #app { display: none; flex-direction: column; min-height: 100vh; }
-    #app.visible { display: flex; }
+/* EYEBROW */
+.eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--border2);}
 
-    header {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem; display: flex; align-items: center; gap: 2rem;
-      height: 56px; position: sticky; top: 0; z-index: 100;
-      box-shadow: var(--shadow);
-    }
-    .header-logo { font-size: 1.15rem; font-weight: 800; color: var(--accent); letter-spacing: -.5px; flex-shrink: 0; }
-    .header-sync { margin-left: auto; font-size: .75rem; color: var(--muted); flex-shrink: 0; }
-    .header-sync span { font-weight: 600; }
+/* SECTION HEADER */
+.sec-head{margin-bottom:28px;}
+.sec-head h2{font-family:'Lora',serif;font-size:26px;font-weight:600;color:var(--ink);}
+.sec-head p{font-size:14px;color:var(--muted2);margin-top:6px;}
 
-    /* ── DB Tabs ───────────────────────────────────────────── */
-    .db-tabs { display: flex; gap: .25rem; }
-    .db-tab {
-      padding: .4rem .85rem; border-radius: 6px; font-size: .85rem; font-weight: 500;
-      cursor: pointer; color: var(--muted); border: none; background: transparent;
-      transition: background .15s, color .15s;
-    }
-    .db-tab:hover { background: var(--bg); color: var(--text); }
-    .db-tab.active { background: var(--accent-lt); color: var(--accent); font-weight: 600; }
+/* TAGS */
+.tag{display:inline-block;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:3px;}
+.tag-green{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-border);}
+.tag-blue{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border);}
+.tag-purple{background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);}
+.tag-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);}
 
-    /* ── Main ─────────────────────────────────────────────── */
-    main { flex: 1; padding: 1.5rem; max-width: 1400px; width: 100%; margin: 0 auto; }
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.badge-free{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border);}
+.badge-pro{background:var(--purple-bg);color:var(--purple-mid);border:1px solid var(--purple-border);}
+.badge-done{background:var(--green-mid);color:#fff;}
 
-    /* ── View Toolbar ─────────────────────────────────────── */
-    .view-toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap;
-    }
-    .view-title { font-size: 1.1rem; font-weight: 700; }
-    .view-switcher { display: flex; gap: .25rem; background: var(--bg); border-radius: 8px; padding: .25rem; }
-    .view-btn {
-      padding: .35rem .75rem; border-radius: 6px; font-size: .8rem; font-weight: 500;
-      cursor: pointer; border: none; background: transparent; color: var(--muted);
-      transition: background .15s, color .15s;
-    }
-    .view-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+/* BUTTONS */
+.btn{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:11px 26px;border-radius:8px;cursor:pointer;transition:all .15s;border:none;display:inline-flex;align-items:center;gap:8px;}
+.btn-dark{background:var(--ink);color:#f0e8d0;}
+.btn-dark:hover{background:#2a2620;}
+.btn-ghost{background:none;color:var(--ink);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface);}
+.btn-green{background:var(--green-mid);color:#fff;}
+.btn-green:hover{background:var(--green);}
+.btn-disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;border:1px solid var(--border);}
 
-    .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; }
-    .filter-select {
-      padding: .35rem .65rem; border: 1.5px solid var(--border); border-radius: 7px;
-      font-size: .8rem; font-family: var(--font); background: var(--surface);
-      color: var(--text); cursor: pointer; outline: none;
-    }
-    .filter-select:focus { border-color: var(--accent); }
+/* ═══════════════════ HOME ═══════════════════ */
+.hero{max-width:660px;margin:0 auto 72px;text-align:center;}
+.hero-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--green-mid);font-weight:500;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:28px;height:1px;background:var(--green-border);}
+.hero h1{font-family:'Lora',serif;font-size:clamp(36px,5.5vw,58px);font-weight:600;line-height:1.1;color:var(--ink);margin-bottom:20px;}
+.hero h1 em{font-style:italic;font-weight:400;}
+.hero-sub{font-size:16px;color:var(--muted2);line-height:1.8;margin-bottom:36px;}
+.hero-ctas{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 
-    /* ── Dashboard View ───────────────────────────────────── */
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem; margin-bottom: 1.5rem;
-    }
-    .stat-card {
-      background: var(--surface); border-radius: var(--radius); padding: 1.1rem 1.25rem;
-      box-shadow: var(--shadow); border: 1px solid var(--border);
-    }
-    .stat-label { font-size: .73rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
-    .stat-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-    .stat-sub   { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
-    .stat-card.green .stat-value { color: var(--green); }
-    .stat-card.blue  .stat-value { color: var(--blue); }
-    .stat-card.amber .stat-value { color: var(--amber); }
-    .stat-card.red   .stat-value { color: var(--red); }
-    .stat-card.accent .stat-value { color: var(--accent); }
+/* How it works */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:64px;}
+@media(max-width:640px){.how-grid{grid-template-columns:1fr;}}
+.how-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px 24px;}
+.how-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;}
+.how-icon{font-size:26px;margin-bottom:14px;}
+.how-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.how-desc{font-size:13px;color:var(--muted2);line-height:1.7;}
 
-    .progress-bar-wrap { background: var(--bg); border-radius: 99px; height: 8px; overflow: hidden; margin-top: .5rem; }
-    .progress-bar-fill { height: 100%; border-radius: 99px; background: var(--green); transition: width .4s ease; }
+/* Article cards */
+.article-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:64px;}
+@media(max-width:720px){.article-grid{grid-template-columns:1fr;}}
+.article-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--sh);}
+.article-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(26,24,20,.1);}
+.article-card-body{padding:22px;}
+.article-card-tag{margin-bottom:12px;}
+.article-card-title{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.35;margin-bottom:8px;}
+.article-card-excerpt{font-size:13px;color:var(--muted2);line-height:1.7;}
+.article-card-foot{padding:12px 22px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.article-meta{font-size:11.5px;color:var(--muted);}
 
-    .breakdown-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    .breakdown-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 1rem 1.25rem; box-shadow: var(--shadow);
-    }
-    .breakdown-title { font-size: .78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .75rem; }
-    .breakdown-row { display: flex; align-items: center; justify-content: space-between; padding: .3rem 0; border-bottom: 1px solid var(--bg); font-size: .85rem; }
-    .breakdown-row:last-child { border-bottom: none; }
-    .breakdown-name { display: flex; align-items: center; gap: .5rem; }
-    .breakdown-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .breakdown-count { font-weight: 700; font-size: .9rem; }
+/* Course cards */
+.course-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:64px;}
+@media(max-width:640px){.course-grid{grid-template-columns:1fr;}}
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--sh);}
+.course-card:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(26,24,20,.1);}
+.course-card-top{padding:28px 28px 20px;border-bottom:1px solid var(--border);}
+.course-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
+.icon-green{background:var(--green-bg);}
+.icon-blue{background:var(--blue-bg);}
+.course-card-title{font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.course-card-desc{font-size:13px;color:var(--muted2);line-height:1.7;}
+.course-card-foot{padding:16px 28px;display:flex;align-items:center;gap:20px;}
+.course-stat{font-size:12px;color:var(--muted);}
+.course-stat strong{color:var(--ink);font-weight:500;}
+.course-cta{margin-left:auto;font-size:12px;font-weight:500;color:var(--muted2);}
 
-    /* ── Kanban View ──────────────────────────────────────── */
-    .kanban-board {
-      display: flex; gap: 1rem; overflow-x: auto; padding-bottom: .5rem;
-      align-items: flex-start;
-    }
-    .kanban-board::-webkit-scrollbar { height: 5px; }
-    .kanban-board::-webkit-scrollbar-track { background: transparent; }
-    .kanban-board::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+/* CTA Banner */
+.cta-banner{background:var(--ink);border-radius:var(--r);padding:40px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.cta-banner h3{font-family:'Lora',serif;font-size:22px;color:#f0e8d0;font-weight:600;margin-bottom:8px;font-style:italic;}
+.cta-banner p{font-size:14px;color:#9a9080;}
+.btn-banner{background:#f0e8d0;color:var(--ink);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:12px 28px;cursor:pointer;white-space:nowrap;}
+.btn-banner:hover{background:#fff;}
 
-    .kanban-col {
-      background: var(--bg); border-radius: var(--radius); padding: .75rem;
-      min-width: 250px; width: 250px; flex-shrink: 0;
-    }
-    .kanban-col-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: .75rem; padding: 0 .25rem;
-    }
-    .kanban-col-name { font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-    .kanban-col-count {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 99px; font-size: .72rem; font-weight: 700;
-      padding: .1rem .45rem; color: var(--muted);
-    }
-    .kanban-cards { display: flex; flex-direction: column; gap: .5rem; }
+/* ═══════════════════ ARTICLES PAGE ═══════════════════ */
+.articles-full-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:720px){.articles-full-grid{grid-template-columns:1fr;}}
 
-    .card {
-      background: var(--surface); border-radius: 8px; padding: .8rem .9rem;
-      box-shadow: var(--shadow); border: 1px solid var(--border);
-      cursor: pointer; transition: box-shadow .15s, transform .1s;
-    }
-    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .card-title { font-size: .88rem; font-weight: 600; line-height: 1.3; margin-bottom: .55rem; }
-    .card-meta  { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
-    .card-link  { text-decoration: none; color: inherit; }
+/* ═══════════════════ ARTICLE READER ═══════════════════ */
+.article-reader-head{margin-bottom:36px;}
+.article-reader-head h1{font-family:'Lora',serif;font-size:clamp(26px,4vw,38px);font-weight:600;line-height:1.2;color:var(--ink);margin-bottom:16px;}
+.article-reader-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.article-reader-body{font-size:15.5px;line-height:1.85;color:var(--ink);}
+.article-reader-body p{margin-bottom:1.4em;}
+.article-reader-body h2{font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--ink);margin:2em 0 .8em;}
+.article-reader-body h3{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--ink);margin:1.6em 0 .6em;}
+.article-reader-body ul{padding-left:1.4em;margin-bottom:1.4em;}
+.article-reader-body ul li{margin-bottom:.5em;}
+.article-reader-body strong{font-weight:500;}
 
-    /* ── Badges ───────────────────────────────────────────── */
-    .badge {
-      display: inline-flex; align-items: center; gap: .25rem;
-      padding: .18rem .5rem; border-radius: 4px;
-      font-size: .72rem; font-weight: 600; white-space: nowrap;
-    }
-    .badge-status-todo       { background: var(--gray-lt);  color: var(--gray); }
-    .badge-status-inprogress { background: var(--blue-lt);  color: var(--blue); }
-    .badge-status-done       { background: var(--green-lt); color: var(--green); }
-    .badge-status-blocked    { background: var(--red-lt);   color: var(--red); }
-    .badge-status-review     { background: var(--amber-lt); color: var(--amber); }
-    .badge-status-planned    { background: var(--accent-lt);color: var(--accent); }
-    .badge-priority-high   { background: var(--red-lt);   color: var(--red); }
-    .badge-priority-medium { background: var(--amber-lt); color: var(--amber); }
-    .badge-priority-low    { background: var(--green-lt); color: var(--green); }
-    .badge-tag { background: var(--accent-lt); color: var(--accent); }
+/* ═══════════════════ COURSES PAGE ═══════════════════ */
+.courses-full-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media(max-width:640px){.courses-full-grid{grid-template-columns:1fr;}}
 
-    .card-date { font-size: .73rem; color: var(--muted); margin-top: .4rem; display: flex; align-items: center; gap: .3rem; }
-    .card-date.overdue { color: var(--red); font-weight: 600; }
-    .card-assignee { font-size: .73rem; color: var(--muted); display: flex; align-items: center; gap: .3rem; }
+/* ═══════════════════ COURSE DETAIL ═══════════════════ */
+.course-detail-head{display:flex;gap:20px;align-items:flex-start;margin-bottom:36px;}
+.course-detail-icon{width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;}
+.course-detail-head h1{font-family:'Lora',serif;font-size:30px;font-weight:600;line-height:1.2;color:var(--ink);margin-bottom:8px;}
+.course-detail-head p{font-size:14px;color:var(--muted2);}
 
-    /* ── Calendar View ────────────────────────────────────── */
-    .cal-nav {
-      display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;
-    }
-    .cal-title { font-size: 1rem; font-weight: 700; min-width: 140px; }
-    .cal-btn {
-      width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border);
-      background: var(--surface); cursor: pointer; font-size: 1rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: background .15s; color: var(--text);
-    }
-    .cal-btn:hover { background: var(--bg); }
+.progress-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;margin-bottom:28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.progress-bar-wrap{flex:1;min-width:160px;}
+.progress-label-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px;}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--blue-mid));border-radius:3px;transition:width .4s;}
+.progress-actions{display:flex;gap:10px;flex-wrap:wrap;}
 
-    .cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      border: 1px solid var(--border); border-radius: var(--radius);
-      overflow: hidden; background: var(--border); gap: 1px;
-    }
-    .cal-day-header {
-      background: var(--surface); text-align: center;
-      font-size: .73rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .05em; padding: .5rem;
-    }
-    .cal-day {
-      background: var(--surface); min-height: 90px; padding: .4rem;
-      position: relative;
-    }
-    .cal-day.other-month { background: var(--gray-lt); }
-    .cal-day.today { background: var(--accent-lt); }
-    .cal-day-num {
-      font-size: .78rem; font-weight: 700; color: var(--muted);
-      margin-bottom: .3rem; width: 22px; height: 22px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-    }
-    .cal-day.today .cal-day-num { background: var(--accent); color: #fff; }
-    .cal-events { display: flex; flex-direction: column; gap: .2rem; }
-    .cal-event {
-      font-size: .68rem; font-weight: 600; padding: .15rem .35rem;
-      border-radius: 4px; white-space: nowrap; overflow: hidden;
-      text-overflow: ellipsis; cursor: pointer;
-      text-decoration: none; display: block;
-    }
-    .cal-event.status-todo       { background: var(--gray-lt);  color: var(--gray); }
-    .cal-event.status-inprogress { background: var(--blue-lt);  color: var(--blue); }
-    .cal-event.status-done       { background: var(--green-lt); color: var(--green); }
-    .cal-event.status-blocked    { background: var(--red-lt);   color: var(--red); }
-    .cal-event.status-review     { background: var(--amber-lt); color: var(--amber); }
-    .cal-event.status-planned    { background: var(--accent-lt);color: var(--accent); }
-    .cal-more { font-size: .65rem; color: var(--accent); font-weight: 600; cursor: pointer; padding: .1rem .35rem; }
+.lessons-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;}
+.lesson-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .15s;box-shadow:var(--sh);}
+.lesson-row:hover:not(.locked){border-color:var(--border2);transform:translateX(3px);}
+.lesson-row.locked{cursor:default;opacity:.7;}
+.lesson-row.completed{border-color:var(--green-border);}
+.lesson-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:24px;}
+.lesson-info{flex:1;}
+.lesson-name{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.lesson-sub{font-size:12.5px;color:var(--muted2);}
+.lesson-meta{display:flex;gap:8px;align-items:center;flex-shrink:0;}
 
-    /* ── Empty state ──────────────────────────────────────── */
-    .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-    .empty-icon { font-size: 2.5rem; margin-bottom: .5rem; }
-    .empty p { font-size: .9rem; }
+.assess-block{background:var(--ink);border-radius:var(--r);padding:28px 32px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.assess-block.assess-ready{background:linear-gradient(135deg,#1e3a60,#2a5040);box-shadow:0 4px 20px rgba(30,60,80,.25);}
+.assess-block.assess-passed{background:linear-gradient(135deg,var(--green),#1a3d28);box-shadow:0 4px 20px rgba(30,90,50,.25);}
+.assess-block-icon{font-size:28px;flex-shrink:0;}
+.assess-block-text{flex:1;}
+.assess-block-text h3{font-family:'Lora',serif;font-size:18px;color:#f0e8d0;font-weight:600;margin-bottom:5px;}
+.assess-block-text p{font-size:13px;color:#aaa8a0;line-height:1.6;}
+.assess-block-actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;}
 
-    /* ── Loading ──────────────────────────────────────────── */
-    .loading { text-align: center; padding: 3rem; color: var(--muted); font-size: .9rem; }
-    .spinner { display: inline-block; width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin-right: .5rem; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* ═══════════════════ LESSON VIEW ═══════════════════ */
+.lesson-layout{display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start;}
+@media(max-width:900px){.lesson-layout{grid-template-columns:1fr;}}
+.lesson-content-col{}
+.lesson-sidebar{position:sticky;top:70px;}
 
-    /* ── Responsive ───────────────────────────────────────── */
-    @media (max-width: 640px) {
-      header { padding: 0 1rem; gap: 1rem; }
-      main { padding: 1rem; }
-      .db-tab { padding: .35rem .6rem; font-size: .78rem; }
-      .cal-grid { font-size: .7rem; }
-      .cal-day { min-height: 60px; }
-    }
-  </style>
+.lesson-head{margin-bottom:32px;}
+.lesson-head h1{font-family:'Lora',serif;font-size:28px;font-weight:600;line-height:1.25;color:var(--ink);margin-bottom:10px;}
+.lesson-head-meta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+
+.lesson-body{font-size:15px;line-height:1.85;color:var(--ink);}
+.lesson-body p{margin-bottom:1.3em;}
+.lesson-body h2{font-family:'Lora',serif;font-size:19px;font-weight:600;color:var(--ink);margin:2em 0 .7em;}
+.lesson-body h3{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--ink);margin:1.5em 0 .5em;}
+.lesson-body ul{padding-left:1.4em;margin-bottom:1.3em;}
+.lesson-body ul li{margin-bottom:.5em;}
+.lesson-body strong{font-weight:500;}
+
+/* Essence block — inline in lesson */
+.essence-block{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:18px 20px;margin:24px 0;display:flex;gap:14px;align-items:flex-start;}
+.essence-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.essence-content{flex:1;}
+.essence-label{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px;}
+.essence-text{font-size:13.5px;line-height:1.7;color:#7a5010;}
+.essence-text strong{color:var(--gold);font-weight:500;}
+.essence-save-btn{flex-shrink:0;background:none;border:1px solid var(--gold-border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:500;color:var(--gold);padding:5px 12px;cursor:pointer;transition:all .15s;white-space:nowrap;align-self:flex-start;}
+.essence-save-btn:hover{background:var(--gold-bg);}
+.essence-save-btn.saved{background:var(--green-mid);color:#fff;border-color:var(--green-mid);}
+
+/* Lesson sidebar */
+.sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;}
+.sidebar-title{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.sidebar-count{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:3px;}
+.sidebar-empty{font-size:13px;color:var(--muted);text-align:center;padding:16px 0;line-height:1.6;}
+.sidebar-essence-item{padding:10px 0;border-bottom:1px solid var(--border);}
+.sidebar-essence-item:last-child{border-bottom:none;}
+.sidebar-essence-text{font-size:12.5px;color:var(--ink);line-height:1.6;}
+.sidebar-essence-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* Lesson nav */
+.lesson-nav{display:flex;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--border);}
+
+/* LESSON QUIZ */
+.lq-wrap{margin-top:48px;}
+.lq-divider{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.lq-divider::before,.lq-divider::after{content:'';flex:1;height:1px;background:var(--border2);}
+.lq-divider-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);font-weight:600;white-space:nowrap;}
+.lq-sub{font-size:13px;color:var(--muted2);margin-bottom:20px;}
+.lq-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;margin-bottom:16px;box-shadow:var(--sh);}
+.lq-q-text{font-family:'Lora',serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1.45;margin-bottom:22px;}
+.lq-options{display:flex;flex-direction:column;gap:9px;}
+.lq-option{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:11px 16px;font-size:13.5px;color:var(--ink);cursor:pointer;transition:all .15s;text-align:left;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:12px;}
+.lq-option:hover:not(.disabled){border-color:var(--border2);background:var(--surface);}
+.lq-option.correct{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-text);}
+.lq-option.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.lq-option.disabled{cursor:default;}
+.lq-opt-letter{width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--muted2);flex-shrink:0;font-family:'DM Mono',monospace;}
+.lq-option.correct .lq-opt-letter{background:var(--green-mid);color:#fff;border-color:var(--green-mid);}
+.lq-option.wrong .lq-opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
+.lq-explain{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:14px 18px;margin-top:14px;font-size:13px;color:#7a5010;line-height:1.75;display:none;}
+.lq-explain.show{display:block;}
+.lq-explain strong{color:var(--gold);font-weight:500;}
+.lq-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+.lq-counter{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--muted);}
+.lq-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;text-align:center;display:none;box-shadow:var(--sh);}
+.lq-result.show{display:block;}
+.lq-result-score{font-family:'Lora',serif;font-size:40px;font-weight:600;color:var(--ink);line-height:1;}
+.lq-result-denom{font-size:18px;color:var(--muted);}
+.lq-result-msg{font-size:14px;color:var(--muted2);margin:10px 0 20px;}
+.lq-result-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.lq-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:5px 14px;border-radius:20px;}
+.lq-badge-correct{background:var(--green-bg);color:var(--green-mid);border:1px solid var(--green-border);}
+.lq-badge-wrong{background:var(--red-bg);color:var(--red);border:1px solid #e0a090;}
+.lq-badge-retry{background:var(--surface2);color:var(--muted2);border:1px solid var(--border);cursor:pointer;}
+.lq-badge-retry:hover{background:var(--border);}
+.lq-q-meta{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:12px;}
+.lq-sub{font-size:13px;color:var(--muted2);margin:-12px 0 24px;text-align:center;}
+.lq-actions{display:flex;justify-content:flex-end;margin-top:10px;}
+.lq-btn-next{background:var(--green-mid);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background .15s;}
+.lq-btn-next:hover{background:var(--green);}
+.lq-result-emoji{font-size:32px;margin:8px 0 4px;}
+.lq-retry-btn{margin-top:16px;background:var(--surface2);color:var(--muted2);border:1px solid var(--border);border-radius:8px;padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;}
+.lq-retry-btn:hover{background:var(--border);}
+.lq-score-badge{display:inline-block;background:var(--green-bg);color:var(--green-mid);border-radius:20px;font-size:11px;font-weight:600;padding:2px 8px;border:1px solid var(--green-border);}
+.lq-opt-letter{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--border);font-size:11px;font-weight:700;flex-shrink:0;}
+.lq-option.correct .lq-opt-letter{background:var(--green-mid);color:#fff;}
+.lq-option.wrong .lq-opt-letter{background:var(--red);color:#fff;}
+
+/* ═══════════════════ ASSESSMENT ═══════════════════ */
+.assess-head{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px 32px;margin-bottom:28px;}
+.assess-head h1{font-family:'Lora',serif;font-size:24px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+.assess-head p{font-size:13.5px;color:var(--muted2);}
+.assess-notes-preview{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:16px 20px;margin-top:16px;}
+.assess-notes-preview-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px;}
+.assess-note-chip{display:inline-block;font-size:12px;color:#7a5010;background:var(--surface);border:1px solid var(--gold-border);border-radius:4px;padding:3px 8px;margin:3px;}
+
+.q-progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:32px;}
+.q-progress-fill{height:100%;background:linear-gradient(90deg,var(--green-mid),var(--blue-mid));border-radius:2px;transition:width .4s;}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.q-counter{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+
+.q-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px;margin-bottom:20px;box-shadow:var(--sh);}
+.q-text{font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);line-height:1.45;margin-bottom:28px;}
+.q-options{display:flex;flex-direction:column;gap:10px;}
+.q-option{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:13px 18px;font-size:14px;color:var(--ink);cursor:pointer;transition:all .15s;text-align:left;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:14px;}
+.q-option:hover:not(.disabled){border-color:var(--border2);background:var(--surface);}
+.q-option.correct{background:var(--green-bg);border-color:var(--green-mid);color:var(--green-text);}
+.q-option.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.q-option.disabled{cursor:default;}
+.opt-letter{width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted2);flex-shrink:0;font-family:'DM Mono',monospace;}
+.q-option.correct .opt-letter{background:var(--green-mid);color:#fff;border-color:var(--green-mid);}
+.q-option.wrong .opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
+
+.q-explain{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:8px;padding:16px 20px;margin-top:16px;font-size:13.5px;color:#7a5010;line-height:1.75;display:none;}
+.q-explain.show{display:block;}
+.q-explain strong{color:var(--gold);font-weight:500;}
+.q-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+.btn-next{background:var(--ink);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;color:#f0e8d0;padding:10px 24px;cursor:pointer;display:none;}
+.btn-next.show{display:block;}
+
+/* Result */
+.result-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:48px 36px;text-align:center;box-shadow:var(--sh);display:none;}
+.result-box.show{display:block;}
+.result-score{font-family:'Lora',serif;font-size:52px;font-weight:600;color:var(--ink);line-height:1;}
+.result-denom{font-size:22px;color:var(--muted);}
+.result-msg{font-size:15px;color:var(--muted2);margin:10px 0 28px;}
+.result-stats{display:flex;gap:0;justify-content:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;max-width:320px;margin:0 auto 28px;}
+.result-stat{flex:1;padding:14px;border-right:1px solid var(--border);}
+.result-stat:last-child{border-right:none;}
+.result-stat-num{font-family:'Lora',serif;font-size:22px;font-weight:600;}
+.result-stat-label{font-size:11px;color:var(--muted);}
+
+/* ═══════════════════ CERTIFICATE ═══════════════════ */
+.cert-wrap{display:flex;justify-content:center;padding:32px 0;}
+.cert{background:var(--surface);width:100%;max-width:640px;border:2px solid var(--border2);border-radius:4px;padding:56px 64px;text-align:center;position:relative;box-shadow:0 8px 40px rgba(26,24,20,.12);}
+.cert::before{content:'';position:absolute;inset:10px;border:1px solid var(--border);border-radius:2px;pointer-events:none;}
+.cert-logo{font-family:'Lora',serif;font-size:14px;font-weight:600;color:var(--muted2);margin-bottom:32px;letter-spacing:.04em;}
+.cert-logo em{font-style:italic;color:var(--green-mid);}
+.cert-presented{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+.cert-name{font-family:'Lora',serif;font-size:36px;font-weight:600;color:var(--ink);border-bottom:1px solid var(--border2);padding-bottom:16px;margin-bottom:20px;font-style:italic;}
+.cert-for{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.cert-course{font-family:'Lora',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:32px;}
+.cert-seal{width:64px;height:64px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:26px;}
+.cert-footer{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);margin-top:32px;padding-top:24px;}
+.cert-footer-item{text-align:center;padding:0 20px;}
+.cert-footer-item:first-child{border-right:1px solid var(--border);}
+.cert-footer-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.cert-footer-val{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--ink);}
+.cert-actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
+
+/* ═══════════════════ NOTEBOOK DRAWER ═══════════════════ */
+.drawer-overlay{position:fixed;inset:0;background:rgba(26,24,20,.35);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;}
+.drawer-overlay.open{opacity:1;pointer-events:all;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:360px;max-width:95vw;background:var(--surface);border-left:1px solid var(--border);z-index:501;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.drawer.open{transform:none;}
+.drawer-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.drawer-title{font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.drawer-close{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:4px;}
+.drawer-close:hover{color:var(--ink);}
+.drawer-body{flex:1;overflow-y:auto;padding:20px 24px;}
+.drawer-empty{text-align:center;padding:40px 0;color:var(--muted);font-size:14px;line-height:1.7;}
+.drawer-group{margin-bottom:24px;}
+.drawer-group-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.drawer-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.drawer-item:last-child{border-bottom:none;}
+.drawer-item-text{font-size:13px;color:var(--ink);line-height:1.6;}
+.drawer-item-source{font-size:11px;color:var(--muted);margin-top:3px;}
+.drawer-item-remove{float:right;background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer;padding:2px;}
+.drawer-item-remove:hover{color:var(--red);}
+
+/* FAB */
+.fab{position:fixed;bottom:28px;right:28px;z-index:400;background:var(--ink);color:#f0e8d0;border:none;border-radius:28px;padding:12px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:0 4px 20px rgba(26,24,20,.25);display:flex;align-items:center;gap:8px;transition:all .2s;}
+.fab:hover{background:#2a2620;transform:translateY(-2px);}
+.fab-count{background:#f0e8d0;color:var(--ink);border-radius:10px;font-size:11px;font-weight:600;padding:1px 7px;}
+.fab.hidden{display:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#f0e8d0;font-size:13px;padding:10px 22px;border-radius:8px;opacity:0;transition:all .25s;z-index:999;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:640px){
+  .container,.container-narrow{padding:40px 18px 80px;}
+  .cta-banner{padding:28px 22px;}
+  .cert{padding:36px 28px;}
+  .cert-name{font-size:26px;}
+  .lesson-layout{grid-template-columns:1fr;}
+  .fab{bottom:16px;right:16px;}
+}
+</style>
 </head>
 <body>
 
-<!-- ══ PASSWORD GATE ══════════════════════════════════════════ -->
-<div id="gate">
-  <div class="gate-card">
-    <div class="gate-logo">BCH</div>
-    <div class="gate-sub">Enter your passphrase to continue</div>
-    <input type="password" id="gate-input" placeholder="••••••••" autocomplete="off" />
-    <button onclick="checkPassword()">Unlock</button>
-    <div id="gate-error"></div>
+<!-- NAV -->
+<nav class="topbar">
+  <div class="brand" onclick="go('home')">Bạn Cùng <em>Học</em></div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nl-home" onclick="go('home')">Trang chủ</button>
+    <button class="nav-link" id="nl-articles" onclick="go('articles')">Bài viết</button>
+    <button class="nav-link" id="nl-courses" onclick="go('courses')">Khóa học</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-sm btn-outline" onclick="toast('Chức năng đăng nhập sẽ sớm ra mắt!')">Đăng nhập</button>
+    <button class="btn-sm btn-primary" onclick="go('courses')">Bắt đầu học</button>
+  </div>
+</nav>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div id="view-home" class="view active">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-eyebrow">Nền tảng học thuật</div>
+      <h1>Học có chiều sâu.<br><em>Nhớ có hệ thống.</em></h1>
+      <p class="hero-sub">Khóa học chuyên sâu về Dược học & Tâm lý học. Ghi lại tinh chất từng bài, kiểm tra kiến thức, và nhận chứng chỉ hoàn thành.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-dark" onclick="go('courses')">Xem khóa học →</button>
+        <button class="btn btn-ghost" onclick="go('articles')">Đọc bài viết</button>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="sec-head">
+      <div class="eyebrow">Cách hoạt động</div>
+      <h2>Ba bước để thực sự nắm vững</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-icon">📚</div>
+        <div class="how-title">Học bài có hệ thống</div>
+        <div class="how-desc">Mỗi khóa học gồm nhiều bài giảng được trình bày rõ ràng, ngắn gọn — kiến thức được chắt lọc từ nguồn học thuật uy tín.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-icon">📌</div>
+        <div class="how-title">Lưu tinh chất cốt lõi</div>
+        <div class="how-desc">Trong mỗi bài học có các khối "Tinh chất cốt lõi" — bấm lưu để tổng hợp vào sổ tay cá nhân, ôn lại bất cứ lúc nào.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-icon">🎓</div>
+        <div class="how-title">Kiểm tra & chứng chỉ</div>
+        <div class="how-desc">Hoàn thành bài kiểm tra cuối khóa để đánh giá năng lực thực sự và nhận chứng chỉ hoàn thành từ Bạn Cùng Học.</div>
+      </div>
+    </div>
+
+    <!-- Featured Articles -->
+    <div class="sec-head">
+      <div class="eyebrow">Bài viết nổi bật</div>
+      <h2>Kiến thức khoa học ngắn gọn</h2>
+      <p>Đọc nhanh, hiểu đúng, áp dụng được ngay.</p>
+    </div>
+    <div class="article-grid" id="home-articles"></div>
+
+    <!-- Featured Courses -->
+    <div class="sec-head">
+      <div class="eyebrow">Khóa học</div>
+      <h2>Bắt đầu từ nền tảng</h2>
+      <p>Từ cơ chế phân tử đến ứng dụng lâm sàng.</p>
+    </div>
+    <div class="course-grid" id="home-courses"></div>
+
+    <div class="cta-banner">
+      <div>
+        <h3>Học miễn phí ngay hôm nay.</h3>
+        <p>Không cần tài khoản để bắt đầu — mở khóa bài học nền tảng ngay.</p>
+      </div>
+      <button class="btn-banner" onclick="go('courses')">Xem khóa học →</button>
+    </div>
   </div>
 </div>
 
-<!-- ══ APP ════════════════════════════════════════════════════ -->
-<div id="app">
-  <header>
-    <div class="header-logo">BCH</div>
-    <nav class="db-tabs" id="db-tabs">
-      <button class="db-tab active" data-db="tasks"   onclick="switchDB('tasks')">Tasks</button>
-      <button class="db-tab"        data-db="content" onclick="switchDB('content')">Content</button>
-      <button class="db-tab"        data-db="roadmap" onclick="switchDB('roadmap')">Roadmap</button>
-    </nav>
-    <div class="header-sync">Synced: <span id="sync-time">—</span></div>
-  </header>
-
-  <main id="main-content"></main>
+<!-- ═══════════ ARTICLES ═══════════ -->
+<div id="view-articles" class="view">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">Bài viết</div>
+      <h2>Tất cả bài viết</h2>
+      <p>Kiến thức chuyên sâu, ngắn gọn và có kiểm duyệt.</p>
+    </div>
+    <div class="articles-full-grid" id="articles-grid"></div>
+  </div>
 </div>
 
+<!-- ═══════════ ARTICLE READER ═══════════ -->
+<div id="view-article-reader" class="view">
+  <div class="container-narrow">
+    <button class="back-link" onclick="go('articles')">← Bài viết</button>
+    <div id="article-reader-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════ COURSES ═══════════ -->
+<div id="view-courses" class="view">
+  <div class="container">
+    <div class="sec-head">
+      <div class="eyebrow">Khóa học</div>
+      <h2>Tất cả khóa học</h2>
+      <p>Học từng bước, kiểm tra từng giai đoạn.</p>
+    </div>
+    <div class="courses-full-grid" id="courses-grid"></div>
+  </div>
+</div>
+
+<!-- ═══════════ COURSE DETAIL ═══════════ -->
+<div id="view-course-detail" class="view">
+  <div class="container-narrow" id="course-detail-content"></div>
+</div>
+
+<!-- ═══════════ LESSON ═══════════ -->
+<div id="view-lesson" class="view">
+  <div class="container" style="padding-top:48px">
+    <button class="back-link" id="lesson-back-btn">← Quay lại khóa học</button>
+    <div class="lesson-layout">
+      <div class="lesson-content-col">
+        <div class="lesson-head" id="lesson-head"></div>
+        <div class="lesson-body" id="lesson-body"></div>
+        <div class="lesson-nav" id="lesson-nav"></div>
+      </div>
+      <div class="lesson-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-title">
+            📋 Sổ tay bài này
+            <span class="sidebar-count" id="sidebar-count">0</span>
+          </div>
+          <div id="sidebar-essence-list">
+            <div class="sidebar-empty">Bấm <strong>📌 Lưu</strong> trên các khối tinh chất để ghi vào sổ tay.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ASSESSMENT ═══════════ -->
+<div id="view-assessment" class="view">
+  <div class="container-narrow" style="padding-top:48px">
+    <button class="back-link" id="assess-back-btn">← Quay lại</button>
+    <div id="assess-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════ CERTIFICATE ═══════════ -->
+<div id="view-certificate" class="view">
+  <div class="container-narrow" style="padding-top:48px">
+    <button class="back-link" id="cert-back-btn">← Về khóa học</button>
+    <div class="sec-head" style="text-align:center">
+      <div class="eyebrow" style="justify-content:center">Chúc mừng!</div>
+      <h2>Bạn đã hoàn thành khóa học</h2>
+    </div>
+    <div class="cert-wrap"><div class="cert" id="cert-content"></div></div>
+    <div class="cert-actions" id="cert-actions"></div>
+  </div>
+</div>
+
+<!-- NOTEBOOK DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeNotebook()"></div>
+<div class="drawer" id="notebook-drawer">
+  <div class="drawer-head">
+    <div class="drawer-title">📋 Sổ tay học tập</div>
+    <button class="drawer-close" onclick="closeNotebook()">✕</button>
+  </div>
+  <div class="drawer-body" id="notebook-body"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab hidden" id="fab" onclick="openNotebook()">
+  📋 Sổ tay <span class="fab-count" id="fab-count">0</span>
+</button>
+
+<div class="toast" id="toast-el"></div>
+
 <script>
-/* ══════════════════════════════════════════════════════════════
-   CONFIG — edit these
-══════════════════════════════════════════════════════════════ */
-const CONFIG = {
-  password: "bch2026",          // ← change this passphrase
-  sessionKey: "bch_unlocked",
-
-  databases: {
-    tasks:   { label: "Tasks",    file: "data/tasks.json",   statusField: "status", dateField: "dueDate" },
-    content: { label: "Content",  file: "data/content.json", statusField: "status", dateField: "publishDate" },
-    roadmap: { label: "Roadmap",  file: "data/roadmap.json", statusField: "status", dateField: "targetDate" },
+/* ══════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════ */
+const ARTICLES = [
+  {
+    id:'a1', tag:'Dược học', tagClass:'tag-green', readTime:'5 phút',
+    title:'5 tương tác thuốc nguy hiểm bạn nên biết',
+    excerpt:'Một số kết hợp thuốc tưởng vô hại nhưng có thể gây hậu quả nghiêm trọng. Hiểu đúng để dùng thuốc an toàn hơn.',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-green">Dược học</span>
+        <h1>5 tương tác thuốc nguy hiểm bạn nên biết</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 5 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 6, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>Tương tác thuốc xảy ra khi hai hay nhiều thuốc dùng đồng thời ảnh hưởng lẫn nhau — có thể làm tăng hoặc giảm hiệu quả, hoặc gây ra tác dụng phụ nguy hiểm không lường trước. Đây là một trong những nguyên nhân phổ biến nhất của các biến cố bất lợi liên quan đến thuốc trong lâm sàng.</p>
+        <h2>1. Warfarin + Aspirin</h2>
+        <p>Warfarin là thuốc chống đông máu; Aspirin ức chế kết tập tiểu cầu. Kết hợp cả hai làm tăng nguy cơ xuất huyết nghiêm trọng — đặc biệt nguy hiểm ở người cao tuổi. Nếu bắt buộc dùng chung (ví dụ: bệnh nhân van tim cơ học đặt stent mạch vành), cần giám sát chặt INR và dấu hiệu xuất huyết.</p>
+        <h2>2. SSRI + MAOI</h2>
+        <p>Đây là tương tác <strong>chống chỉ định tuyệt đối</strong>. Dùng chung thuốc ức chế tái hấp thu serotonin (SSRI như Fluoxetine) với thuốc ức chế MAO có thể gây hội chứng serotonin — một cấp cứu y tế với biểu hiện kích động, tăng thân nhiệt, co giật, thậm chí tử vong. Khoảng cách "wash-out" tối thiểu là 14 ngày sau khi ngừng MAOI.</p>
+        <h2>3. Statins + Macrolides</h2>
+        <p>Clarithromycin và Erythromycin ức chế CYP3A4 — enzyme chuyển hóa nhiều Statin (Simvastatin, Lovastatin). Kết quả là nồng độ Statin tăng vọt trong máu → nguy cơ tiêu cơ vân (rhabdomyolysis) và tổn thương thận cấp. Giải pháp: tạm ngưng Statin trong thời gian dùng kháng sinh, hoặc dùng Rosuvastatin/Pravastatin không bị ảnh hưởng bởi CYP3A4.</p>
+        <h2>4. Metformin + thuốc cản quang chứa iod</h2>
+        <p>Thuốc cản quang có thể làm giảm chức năng thận tạm thời, gây tích lũy Metformin → nguy cơ nhiễm toan lactic (lactic acidosis) nghiêm trọng. Hướng dẫn hiện tại khuyến cáo ngưng Metformin 48 giờ trước và sau khi dùng cản quang ở bệnh nhân có nguy cơ thận.</p>
+        <h2>5. Fluoroquinolones + Antacids</h2>
+        <p>Antacid chứa Ca²⁺, Mg²⁺, Al³⁺ tạo phức chelate với Ciprofloxacin và các Fluoroquinolone → giảm hấp thu thuốc lên tới 90%. Dặn bệnh nhân uống kháng sinh ít nhất <strong>2 giờ trước hoặc 6 giờ sau</strong> khi uống antacid, sắt, hoặc thực phẩm bổ sung canxi.</p>
+        <p style="font-style:italic;color:var(--muted2);margin-top:2em">Thông tin trên mang tính giáo dục. Mọi quyết định dùng thuốc cần tham khảo dược sĩ hoặc bác sĩ điều trị.</p>
+      </div>`
   },
-
-  // Status → display config (add/remove as needed)
-  statusConfig: {
-    "To Do":      { label: "To Do",      cls: "todo",        color: "#9ca3af" },
-    "In Progress":{ label: "In Progress",cls: "inprogress",  color: "#3b82f6" },
-    "In Review":  { label: "In Review",  cls: "review",      color: "#f59e0b" },
-    "Done":       { label: "Done",       cls: "done",        color: "#10b981" },
-    "Blocked":    { label: "Blocked",    cls: "blocked",     color: "#ef4444" },
-    "Planned":    { label: "Planned",    cls: "planned",     color: "#6366f1" },
-    "Published":  { label: "Published",  cls: "done",        color: "#10b981" },
-    "Draft":      { label: "Draft",      cls: "todo",        color: "#9ca3af" },
-    "Scheduled":  { label: "Scheduled",  cls: "planned",     color: "#6366f1" },
+  {
+    id:'a2', tag:'Tâm lý học', tagClass:'tag-blue', readTime:'6 phút',
+    title:'Rối loạn lo âu — không chỉ là "lo lắng thông thường"',
+    excerpt:'Gần 1/3 dân số trải qua rối loạn lo âu trong đời. Hiểu đúng để nhận diện sớm và hỗ trợ bản thân hoặc người thân.',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-blue">Tâm lý học</span>
+        <h1>Rối loạn lo âu — không chỉ là "lo lắng thông thường"</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 6 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 6, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>Lo lắng là phản ứng bình thường của não bộ trước nguy hiểm. Nhưng khi lo âu xảy ra quá mức, kéo dài và cản trở cuộc sống hàng ngày — đó là lúc ta cần nhìn nhận nó như một vấn đề sức khỏe thực sự.</p>
+        <h2>Lo âu bình thường vs. Rối loạn lo âu</h2>
+        <p>Lo âu <strong>bình thường</strong>: có nguyên nhân cụ thể, tương xứng với tình huống, qua đi sau khi sự kiện kết thúc.</p>
+        <p>Rối loạn lo âu: lo lắng quá mức, khó kiểm soát, kéo dài (DSM-5 yêu cầu ≥6 tháng cho GAD), gây suy giảm chức năng đáng kể trong công việc, học tập, các mối quan hệ.</p>
+        <h2>Các dạng rối loạn lo âu phổ biến</h2>
+        <ul>
+          <li><strong>GAD (Rối loạn lo âu lan tỏa):</strong> Lo lắng về nhiều lĩnh vực khác nhau, kèm căng thẳng cơ bắp, mất ngủ, khó tập trung.</li>
+          <li><strong>Panic Disorder:</strong> Các cơn hoảng loạn đột ngột kèm tim đập mạnh, khó thở, cảm giác sắp chết — và lo sợ dai dẳng về các cơn tiếp theo.</li>
+          <li><strong>Ám ảnh sợ (Phobia):</strong> Sợ hãi mạnh mẽ, phi lý với một đối tượng/tình huống cụ thể (nhện, không gian hẹp, nói trước đám đông).</li>
+          <li><strong>OCD:</strong> Suy nghĩ ám ảnh xâm nhập (obsessions) dẫn đến hành vi nghi thức cưỡng bức (compulsions).</li>
+        </ul>
+        <h2>Điều trị hiệu quả</h2>
+        <p>Cả liệu pháp tâm lý và thuốc đều có bằng chứng khoa học rõ ràng. CBT (Cognitive Behavioral Therapy) là phương pháp được nghiên cứu nhiều nhất. SSRI/SNRI là nhóm thuốc đầu tay. Kết hợp cả hai thường cho hiệu quả tốt hơn đơn trị liệu.</p>
+        <p style="font-style:italic;color:var(--muted2)">Nếu bạn nhận thấy các dấu hiệu trên, hãy trao đổi với chuyên gia tâm lý hoặc bác sĩ tâm thần để được đánh giá đúng.</p>
+      </div>`
   },
-
-  kanbanOrder: ["To Do","Draft","Planned","In Progress","In Review","Blocked","Done","Published","Scheduled"],
-};
-
-/* ══════════════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════════════ */
-const state = {
-  currentDB: "tasks",
-  currentView: "dashboard",   // dashboard | kanban | calendar
-  data: {},                   // { tasks: {...}, content: {...}, roadmap: {...} }
-  calMonth: new Date().getMonth(),
-  calYear:  new Date().getFullYear(),
-  filters: { status: "", priority: "" },
-};
-
-/* ══════════════════════════════════════════════════════════════
-   PASSWORD GATE
-══════════════════════════════════════════════════════════════ */
-function checkPassword() {
-  const val = document.getElementById("gate-input").value;
-  if (val === CONFIG.password) {
-    sessionStorage.setItem(CONFIG.sessionKey, "1");
-    document.getElementById("gate").classList.add("hidden");
-    document.getElementById("app").classList.add("visible");
-    loadAllData();
-  } else {
-    document.getElementById("gate-error").textContent = "Incorrect passphrase. Try again.";
-    document.getElementById("gate-input").value = "";
+  {
+    id:'a3', tag:'Dược học', tagClass:'tag-green', readTime:'4 phút',
+    title:'Tại sao kháng sinh ngày càng kém hiệu quả?',
+    excerpt:'Đề kháng kháng sinh là một trong những mối đe dọa y tế lớn nhất thế kỷ 21. Cơ chế nào khiến vi khuẩn ngày càng mạnh hơn?',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-green">Dược học</span>
+        <h1>Tại sao kháng sinh ngày càng kém hiệu quả?</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 4 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 5, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>Kháng kháng sinh (Antimicrobial Resistance — AMR) xảy ra khi vi khuẩn tiến hóa để "né tránh" tác dụng của thuốc. WHO xếp AMR vào nhóm 10 mối đe dọa sức khỏe toàn cầu hàng đầu.</p>
+        <h2>Các cơ chế đề kháng chính</h2>
+        <ul>
+          <li><strong>Enzyme phân hủy thuốc:</strong> Vi khuẩn tiết ra beta-lactamase phá hủy vòng beta-lactam của Penicillin/Cephalosporin.</li>
+          <li><strong>Bơm đẩy thuốc ra ngoài (Efflux pump):</strong> Bơm protein chủ động đẩy kháng sinh ra khỏi tế bào vi khuẩn trước khi thuốc kịp tác dụng.</li>
+          <li><strong>Thay đổi đích tác dụng:</strong> Vi khuẩn đột biến receptor — ví dụ MRSA thay đổi Penicillin Binding Protein (PBP2a) nên Methicillin không còn gắn được.</li>
+          <li><strong>Giảm thấm:</strong> Vi khuẩn giảm protein kênh (porin) trên màng → thuốc khó xâm nhập vào bên trong.</li>
+        </ul>
+        <h2>Tại sao con người góp phần vào vấn đề này?</h2>
+        <p>Dùng kháng sinh không cần thiết (cảm cúm do virus không cần kháng sinh), không uống đủ liệu trình, dùng trong chăn nuôi gia súc quy mô lớn — tất cả tạo áp lực tiến hóa chọn lọc các chủng đề kháng.</p>
+        <h2>Nguyên tắc dùng kháng sinh đúng</h2>
+        <p>Dùng đúng thuốc, đúng liều, đúng thời gian. Không tự ý mua hoặc ngưng thuốc sớm. Đây không chỉ là vấn đề của cá nhân — mà là trách nhiệm với cộng đồng.</p>
+      </div>`
+  },
+  {
+    id:'a4', tag:'Tâm lý học', tagClass:'tag-blue', readTime:'5 phút',
+    title:'CBT có thực sự hiệu quả không? Bằng chứng nói gì',
+    excerpt:'Liệu pháp hành vi nhận thức được quảng bá rộng rãi — nhưng bằng chứng khoa học ủng hộ nó đến đâu?',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-blue">Tâm lý học</span>
+        <h1>CBT có thực sự hiệu quả không? Bằng chứng nói gì</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 5 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 5, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>CBT (Cognitive Behavioral Therapy — Liệu pháp Hành vi Nhận thức) là một trong những phương pháp tâm lý được nghiên cứu nhiều nhất trên thế giới. Nhưng "hiệu quả" đến mức nào, và với ai?</p>
+        <h2>Bằng chứng mạnh mẽ với các rối loạn cụ thể</h2>
+        <p>Hàng nghìn thử nghiệm lâm sàng ngẫu nhiên (RCT) và meta-analysis cho thấy CBT có hiệu quả cao với: Rối loạn lo âu (GAD, Panic Disorder, Phobia xã hội), Trầm cảm, OCD (dạng ERP), PTSD, và Rối loạn ăn uống.</p>
+        <h2>Cơ chế hoạt động</h2>
+        <p>CBT không chỉ là "nghĩ tích cực". Nó làm việc theo hướng xác định và thách thức các <strong>nhận thức sai lệch</strong> (cognitive distortions) — những cách tư duy cứng nhắc, thiên lệch ảnh hưởng đến cảm xúc và hành vi. Sau đó thay thế bằng suy nghĩ dựa trên bằng chứng thực tế hơn.</p>
+        <h2>Giới hạn của CBT</h2>
+        <p>CBT đòi hỏi người học chủ động — làm bài tập giữa các buổi, thực hành kỹ năng. Với một số rối loạn nhân cách phức tạp hoặc chấn thương sâu, các tiếp cận dài hạn hơn như DBT, EMDR hoặc liệu pháp phân tâm có thể phù hợp hơn.</p>
+        <p>Kết luận: CBT là công cụ cực kỳ mạnh mẽ — nhưng không phải là giải pháp duy nhất cho mọi vấn đề tâm lý.</p>
+      </div>`
+  },
+  {
+    id:'a5', tag:'Dược học', tagClass:'tag-green', readTime:'7 phút',
+    title:'ADME — Hành trình của thuốc trong cơ thể bạn',
+    excerpt:'Từ khi bạn nuốt một viên thuốc đến khi nó phát huy tác dụng và bị đào thải — một hành trình phức tạp đáng kinh ngạc.',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-green">Dược học</span>
+        <h1>ADME — Hành trình của thuốc trong cơ thể bạn</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 7 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 4, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>Dược động học (Pharmacokinetics) nghiên cứu điều cơ thể "làm" với thuốc, tóm gọn trong 4 chữ: <strong>ADME</strong> — Absorption (Hấp thu), Distribution (Phân phối), Metabolism (Chuyển hóa), Excretion (Thải trừ).</p>
+        <h2>A — Hấp thu (Absorption)</h2>
+        <p>Thuốc uống phải đi qua niêm mạc dạ dày và ruột trước khi vào máu. Chỉ một phần thuốc thực sự đến được vòng tuần hoàn — gọi là Bioavailability (F). Thuốc tiêm tĩnh mạch có F=100% vì bỏ qua toàn bộ quá trình này.</p>
+        <h2>D — Phân phối (Distribution)</h2>
+        <p>Sau khi vào máu, thuốc phân phối vào các mô khác nhau. Thể tích phân phối (Vd) mô tả "không gian ảo" mà thuốc chiếm. Thuốc tan trong lipid có Vd lớn — phân phối nhiều vào mô mỡ và não.</p>
+        <h2>M — Chuyển hóa (Metabolism)</h2>
+        <p>Gan là "nhà máy" chuyển hóa thuốc chính, chủ yếu qua hệ enzyme Cytochrome P450 (CYP). First-pass metabolism xảy ra ngay khi thuốc từ ruột đi qua gan lần đầu — lý do nhiều thuốc uống không dùng được đường uống (Lidocaine, Insulin, Nitroglycerin).</p>
+        <h2>E — Thải trừ (Excretion)</h2>
+        <p>Thận là đường thải trừ chính. Thời gian bán thải (t½) xác định tần suất dùng thuốc: thuốc t½ dài → dùng ít lần/ngày; t½ ngắn → cần dùng nhiều lần hoặc truyền liên tục. Sau 4-5 t½, thuốc đạt trạng thái ổn định (Steady State) trong máu.</p>
+      </div>`
+  },
+  {
+    id:'a6', tag:'Tâm lý học', tagClass:'tag-blue', readTime:'5 phút',
+    title:'Big Five — Mô hình nhân cách được khoa học chứng minh',
+    excerpt:'MBTI phổ biến nhưng thiếu độ tin cậy. Big Five (OCEAN) mới là tiêu chuẩn khoa học để hiểu nhân cách con người.',
+    content:`
+      <div class="article-reader-head">
+        <span class="tag tag-blue">Tâm lý học</span>
+        <h1>Big Five — Mô hình nhân cách được khoa học chứng minh</h1>
+        <div class="article-reader-meta">
+          <span class="article-meta">⏱ 5 phút đọc</span>
+          <span class="article-meta">Bạn Cùng Học · Tháng 4, 2026</span>
+        </div>
+      </div>
+      <div class="article-reader-body">
+        <p>Trong khi MBTI xuất hiện khắp nơi trên mạng xã hội, các nhà tâm lý học chuyên nghiệp sử dụng một công cụ khác có nền tảng nghiên cứu vững chắc hơn nhiều: Mô hình Big Five (hay OCEAN).</p>
+        <h2>5 chiều nhân cách</h2>
+        <ul>
+          <li><strong>O — Openness to Experience (Cởi mở):</strong> Tư duy sáng tạo, ham học hỏi, thích những ý tưởng mới và trải nghiệm đa dạng.</li>
+          <li><strong>C — Conscientiousness (Tận tâm):</strong> Có tổ chức, đáng tin cậy, kiên trì với mục tiêu, cẩn thận trong từng hành động.</li>
+          <li><strong>E — Extraversion (Hướng ngoại):</strong> Năng lượng dồi dào khi ở cùng người khác, thích giao tiếp và trung tâm chú ý.</li>
+          <li><strong>A — Agreeableness (Dễ chịu):</strong> Hợp tác, đồng cảm, tin tưởng vào người khác, tránh xung đột.</li>
+          <li><strong>N — Neuroticism (Bất ổn cảm xúc):</strong> Xu hướng trải nghiệm cảm xúc tiêu cực mạnh hơn — lo âu, buồn bã, dễ bị kích động.</li>
+        </ul>
+        <h2>Tại sao Big Five đáng tin hơn MBTI?</h2>
+        <p>Big Five được xây dựng từ phân tích nhân tố thống kê trên dữ liệu thực tế, đo lường theo thang liên tục (không phải phân loại nhị phân), và có độ tin cậy tái kiểm tra cao. MBTI phân loại người thành các "hộp" cứng nhắc — nghiên cứu cho thấy chỉ sau vài tuần, 50% người làm lại MBTI nhận được kết quả khác.</p>
+      </div>`
   }
-}
+];
 
-document.getElementById("gate-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") checkPassword();
-  document.getElementById("gate-error").textContent = "";
-});
-
-// Auto-unlock if already authenticated this session
-if (sessionStorage.getItem(CONFIG.sessionKey) === "1") {
-  document.getElementById("gate").classList.add("hidden");
-  document.getElementById("app").classList.add("visible");
-  loadAllData();
-}
-
-/* ══════════════════════════════════════════════════════════════
-   DATA LOADING
-══════════════════════════════════════════════════════════════ */
-async function loadAllData() {
-  renderLoading();
-  const keys = Object.keys(CONFIG.databases);
-  await Promise.all(keys.map(async key => {
-    try {
-      const res = await fetch(CONFIG.databases[key].file + "?t=" + Date.now());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      state.data[key] = await res.json();
-    } catch (e) {
-      state.data[key] = { lastSync: null, items: [] };
-      console.warn(`Failed to load ${key}:`, e);
+const COURSES = [
+  {
+    id:'c1', icon:'💊', iconClass:'icon-green', tag:'Dược học', tagClass:'tag-green',
+    title:'Dược lý Nền tảng',
+    desc:'Hiểu cơ chế tác dụng thuốc từ receptor đến lâm sàng. Nền tảng bắt buộc cho mọi sinh viên Y-Dược.',
+    lessonCount:3, freeCount:2,
+    lessons:[
+      {
+        id:'l1', title:'Thuốc hoạt động như thế nào? — Dược lực học cơ bản',
+        duration:'12 phút', free:true,
+        essences:[
+          {id:'e1', text:'<strong>Dược lực học</strong> nghiên cứu cơ chế tác dụng của thuốc: thuốc gắn vào receptor, tạo ra đáp ứng sinh học — giống chìa khóa và ổ khóa.'},
+          {id:'e2', text:'<strong>Agonist</strong> = kích hoạt receptor → tạo đáp ứng. <strong>Antagonist</strong> = chiếm chỗ receptor nhưng không tạo đáp ứng → ức chế agonist nội sinh.'},
+          {id:'e3', text:'<strong>Potency ≠ Efficacy.</strong> Potency (hiệu lực) = ED50 — liều cần để đạt 50% đáp ứng. Efficacy (hiệu năng) = Emax — đáp ứng tối đa có thể đạt được.'},
+          {id:'e4', text:'<strong>Therapeutic Index = LD50 / ED50.</strong> TI thấp (Digoxin ≈2, Warfarin, Lithium) → cần theo dõi nồng độ huyết thanh chặt chẽ.'},
+        ],
+        quiz:[
+          {q:'Thuốc A có ED50=10mg, thuốc B có ED50=100mg. Thuốc nào có potency (hiệu lực) cao hơn?',opts:['Thuốc B — vì ED50 cao hơn','Thuốc A — vì cần ít liều hơn để đạt 50% đáp ứng','Bằng nhau nếu Emax giống nhau','Không thể so sánh thiếu dữ liệu Emax'],correct:1,explain:'<strong>Potency</strong> được đo bằng ED50 — liều càng thấp để đạt 50% đáp ứng thì potency càng CAO. Thuốc A cần 10mg so với 100mg của B → Thuốc A có potency cao hơn 10 lần. Lưu ý: potency khác với efficacy (Emax).'},
+          {q:'Điểm khác biệt chính giữa full agonist và partial agonist là gì?',opts:['Partial agonist không gắn được vào receptor','Full agonist đạt Emax cao hơn partial agonist','Partial agonist có potency thấp hơn','Full agonist cần liều cao hơn'],correct:1,explain:'<strong>Full agonist</strong> có intrinsic activity = 1 → đạt Emax tối đa. <strong>Partial agonist</strong> có intrinsic activity < 1 → Emax thấp hơn, dù tăng liều đến đâu cũng không đạt Emax của full agonist. Partial agonist thậm chí có thể hành xử như antagonist khi có full agonist.'},
+          {q:'Tại sao Digoxin cần theo dõi nồng độ huyết thanh định kỳ?',opts:['Vì thuốc đắt tiền','Vì Digoxin có Therapeutic Index thấp (TI ≈ 2)','Vì thuốc bị thải trừ nhanh','Vì không có đường dùng khác'],correct:1,explain:'<strong>TI = LD50/ED50 ≈ 2</strong> nghĩa là liều gây độc chỉ gấp 2 lần liều điều trị — "cửa sổ an toàn" rất hẹp. Nồng độ trị liệu Digoxin: 0.5–2 ng/mL; trên 2 ng/mL có thể gây loạn nhịp nguy hiểm. Cùng nhóm TI thấp: Warfarin, Lithium, Phenytoin.'},
+        ],
+        content:`
+<p>Khi bạn nuốt một viên thuốc Paracetamol, điều gì xảy ra bên trong cơ thể? Câu trả lời nằm ở một nhánh khoa học gọi là <strong>dược lực học</strong> (Pharmacodynamics) — nghiên cứu cách thuốc tương tác với cơ thể ở cấp độ phân tử.</p>
+<h2>Receptor — Ổ khóa của tế bào</h2>
+<p>Hầu hết thuốc hoạt động bằng cách gắn vào các protein đặc hiệu gọi là receptor. Khi "chìa khóa" (thuốc) khớp với "ổ khóa" (receptor), một chuỗi phản ứng sinh học được khởi động.</p>
+<ul>
+  <li><strong>Agonist:</strong> Thuốc kích hoạt receptor, tạo ra đáp ứng (Salbutamol kích hoạt β2-receptor → giãn phế quản)</li>
+  <li><strong>Antagonist:</strong> Thuốc chiếm chỗ receptor nhưng không kích hoạt, ngăn agonist tự nhiên (Propranolol chặn β1-receptor → giảm nhịp tim)</li>
+</ul>`
+      },
+      {
+        id:'l2', title:'ADME — Hành trình của thuốc trong cơ thể',
+        duration:'15 phút', free:true,
+        essences:[
+          {id:'e5', text:'<strong>Bioavailability (F)</strong> = tỷ lệ thuốc đến được tuần hoàn. Đường IV: F = 100%. Đường uống thường thấp hơn do first-pass metabolism tại gan.'},
+          {id:'e6', text:'<strong>t½ = 0.693 × Vd / CL.</strong> Sau 4–5 lần t½, thuốc đạt Steady State. Thuốc t½ dài → dùng ít lần/ngày; t½ ngắn → cần dùng nhiều lần.'},
+          {id:'e7', text:'<strong>First-pass metabolism:</strong> Thuốc uống bị gan chuyển hóa trước khi vào tuần hoàn. Lý do Lidocaine, Nitroglyerin không dùng được đường uống.'},
+        ],
+        quiz:[
+          {q:'Sau bao nhiêu lần t½ thì thuốc đạt Steady State (trạng thái ổn định)?',opts:['1–2 t½','2–3 t½','4–5 t½','7–10 t½'],correct:2,explain:'Thuốc đạt <strong>Steady State</strong> sau khoảng <strong>4–5 t½</strong> khi dùng liều đều đặn. Tại Steady State, tốc độ hấp thu = tốc độ thải trừ → nồng độ ổn định. Ví dụ: Digoxin t½≈36h → cần ~7 ngày mới đạt Css.'},
+          {q:'Cơ quan nào chủ yếu chuyển hóa thuốc qua hệ enzyme Cytochrome P450?',opts:['Thận','Phổi','Ruột non','Gan'],correct:3,explain:'<strong>Gan</strong> là "nhà máy" chuyển hóa thuốc chính, với hệ enzyme CYP450 (CYP3A4, CYP2D6, CYP2C9...). Một phần nhỏ cũng xảy ra ở thành ruột. First-pass metabolism tại gan lý giải tại sao nhiều thuốc không thể dùng đường uống.'},
+          {q:'Thuốc nào KHÔNG thể dùng đường uống hiệu quả do first-pass metabolism quá lớn?',opts:['Amoxicillin','Metformin','Lidocaine','Atorvastatin'],correct:2,explain:'<strong>Lidocaine</strong> có first-pass metabolism >90% → hầu hết bị phá hủy tại gan trước khi vào tuần hoàn chung. Vì vậy chỉ dùng đường IV cho điều trị loạn nhịp. Tương tự: Nitroglycerin (dùng ngậm dưới lưỡi), Morphine (uống cần liều cao hơn đáng kể so với IV).'},
+        ],
+        content:`
+<p>Dược động học (Pharmacokinetics) nghiên cứu điều cơ thể làm với thuốc — tóm gọn trong 4 chữ: <strong>ADME</strong>.</p>
+<h2>A — Absorption (Hấp thu)</h2>
+<p>Thuốc uống phải qua niêm mạc dạ dày-ruột mới vào được máu. Chỉ một phần đến được tuần hoàn — gọi là <strong>Bioavailability (F)</strong>. Tiêm tĩnh mạch có F = 100% vì thuốc đi thẳng vào máu.</p>
+<h2>D — Distribution (Phân phối)</h2>
+<p>Sau khi vào máu, thuốc phân phối vào các mô. <strong>Thể tích phân phối (Vd)</strong> = Dose / Cp₀. Vd lớn → thuốc "ưa" mô hơn máu — điển hình là thuốc tan trong lipid.</p>
+<h2>M — Metabolism (Chuyển hóa)</h2>
+<p>Gan chuyển hóa thuốc qua hệ enzyme <strong>Cytochrome P450</strong>. First-pass metabolism xảy ra ngay lần đầu thuốc qua gan — một số thuốc bị phá hủy gần như hoàn toàn (Lidocaine: >90%).</p>
+<h2>E — Excretion (Thải trừ)</h2>
+<p>Thận là đường thải trừ chính. <strong>Thời gian bán thải (t½)</strong> xác định tần suất dùng thuốc và thời gian đạt Steady State.</p>`
+      },
+      {
+        id:'l3', title:'Nhóm thuốc tim mạch — Beta-blocker, ACEI và Statin',
+        duration:'18 phút', free:false,
+        essences:[
+          {id:'e8', text:'Beta-blocker chẹn β1-receptor → giảm nhịp tim, giảm co bóp, giảm huyết áp. Chú ý: không ngưng đột ngột ở bệnh tim mạch.'},
+          {id:'e9', text:'ACEI gây ho khan ở 5–20% bệnh nhân do tích lũy bradykinin. Không dùng cho phụ nữ có thai (category D).'},
+        ],
+        content:''
+      }
+    ],
+    assessment:{
+      questions:[
+        {q:'Thuốc antagonist cạnh tranh tác dụng như thế nào khi tăng nồng độ agonist?',opts:['Tác dụng ức chế tăng lên','Tác dụng ức chế có thể bị khắc phục','Gây ra tác dụng của riêng nó','Không thay đổi'],correct:1,explain:'<strong>Antagonist cạnh tranh</strong> gắn thuận nghịch vào receptor. Khi tăng nồng độ agonist, agonist có thể chiếm lại receptor → khắc phục ức chế. Đường cong dose-response dịch sang phải nhưng Emax không đổi.'},
+        {q:'Bioavailability của thuốc tiêm tĩnh mạch (IV) là bao nhiêu?',opts:['50%','75%','≈90%','100%'],correct:3,explain:'Đường IV đưa thuốc trực tiếp vào tuần hoàn, không qua first-pass metabolism → <strong>F = 100%</strong> luôn luôn.'},
+        {q:'Công thức tính thời gian bán thải (t½) là gì?',opts:['t½ = 0.693 × CL / Vd','t½ = Dose / Cp₀','t½ = 0.693 × Vd / CL','t½ = AUC × CL'],correct:2,explain:'<strong>t½ = 0.693 × Vd / CL</strong>. Hằng số 0.693 = ln(2). t½ tỷ lệ thuận với Vd và nghịch với CL (Clearance).'},
+        {q:'Thuốc nào có Therapeutic Index thấp nhất, cần theo dõi nồng độ huyết thanh?',opts:['Amoxicillin','Paracetamol','Digoxin','Ibuprofen'],correct:2,explain:'<strong>Digoxin</strong> có TI ≈ 2 — ngưỡng độc rất gần ngưỡng điều trị. Cùng nhóm TI thấp: Warfarin, Lithium, Phenytoin, Aminoglycosides.'},
+        {q:'First-pass metabolism xảy ra ở đâu chủ yếu?',opts:['Thận','Ruột non','Gan','Phổi'],correct:2,explain:'<strong>Gan</strong> là nơi first-pass metabolism chủ yếu xảy ra khi thuốc được hấp thu từ ruột vào tĩnh mạch cửa, qua gan trước khi vào tuần hoàn chung. Một phần nhỏ cũng xảy ra ở thành ruột.'},
+      ]
     }
-  }));
-  updateSyncTime();
-  render();
-}
-
-function updateSyncTime() {
-  const db = state.data[state.currentDB];
-  const el = document.getElementById("sync-time");
-  if (db && db.lastSync) {
-    const d = new Date(db.lastSync);
-    el.textContent = d.toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
-  } else {
-    el.textContent = "never";
+  },
+  {
+    id:'c2', icon:'🧠', iconClass:'icon-blue', tag:'Tâm lý học', tagClass:'tag-blue',
+    title:'Tâm lý học Lâm sàng Cơ bản',
+    desc:'Nhân cách, rối loạn lo âu và nền tảng CBT — kiến thức cốt lõi cho sinh viên Tâm lý học và những ai muốn hiểu bản thân hơn.',
+    lessonCount:3, freeCount:2,
+    lessons:[
+      {
+        id:'l4', title:'Lý thuyết nhân cách — Từ Freud đến Big Five',
+        duration:'14 phút', free:true,
+        essences:[
+          {id:'e10', text:'<strong>Freud — Cấu trúc tâm lý:</strong> Id (bản năng, nguyên tắc khoái cảm) → Ego (thực tế, điều phối) → Superego (đạo đức, lương tâm).'},
+          {id:'e11', text:'<strong>Jung</strong> bổ sung Collective Unconscious với các Archetype (Shadow, Anima/Animus, Persona) — tầng vô thức sâu chung của nhân loại.'},
+          {id:'e12', text:'<strong>Big Five (OCEAN):</strong> Openness · Conscientiousness · Extraversion · Agreeableness · Neuroticism — mô hình nhân cách có nền tảng nghiên cứu vững chắc nhất.'},
+        ],
+        quiz:[
+          {q:'Theo Freud, Id hoạt động theo nguyên tắc nào?',opts:['Nguyên tắc thực tế (reality principle)','Nguyên tắc khoái cảm (pleasure principle)','Nguyên tắc đạo đức (morality principle)','Nguyên tắc cân bằng (balance principle)'],correct:1,explain:'<strong>Id</strong> hoạt động theo <strong>nguyên tắc khoái cảm</strong> — đòi hỏi thỏa mãn bản năng ngay lập tức, không quan tâm đến thực tế hay đạo đức. Ego (nguyên tắc thực tế) điều phối Id với thực tế. Superego (lương tâm) áp đặt các chuẩn mực đạo đức.'},
+          {q:'Chiều nhân cách nào trong Big Five liên quan nhất đến xu hướng lo âu và bất ổn cảm xúc?',opts:['Openness','Agreeableness','Conscientiousness','Neuroticism'],correct:3,explain:'<strong>Neuroticism (N)</strong> đo xu hướng trải nghiệm cảm xúc tiêu cực — lo âu, buồn bã, dễ cáu kỉnh, dễ bị stress. Điểm N cao → dễ bị rối loạn lo âu và trầm cảm hơn. Đây là chiều dự đoán tốt nhất cho sức khỏe tâm thần trong Big Five.'},
+          {q:'Carl Jung đề xuất khái niệm "Collective Unconscious" chứa điều gì?',opts:['Ký ức cá nhân bị dồn nén','Archetype — nguyên mẫu tâm lý chung của nhân loại','Bản năng sinh tồn cơ bản','Kinh nghiệm xã hội tích lũy'],correct:1,explain:'Jung tin rằng ngoài vô thức cá nhân, còn có <strong>Collective Unconscious</strong> — tầng vô thức sâu hơn chứa các <strong>Archetype</strong> (nguyên mẫu) như Shadow, Anima/Animus, Hero, Persona — được chia sẻ bởi toàn nhân loại qua tiến hóa. Đây là điểm khác biệt lớn nhất giữa Jung và Freud.'},
+        ],
+        content:`
+<p>Nhân cách là tổ hợp ổn định của suy nghĩ, cảm xúc và hành vi đặc trưng cho một người. Nhiều lý thuyết khác nhau đã cố gắng giải thích nó — mỗi lý thuyết cung cấp một góc nhìn có giá trị.</p>
+<h2>Phân tâm học — Sigmund Freud</h2>
+<p>Freud chia tâm lý thành ba cấu trúc:</p>
+<ul>
+  <li><strong>Id:</strong> Bản năng nguyên thủy, hoạt động theo nguyên tắc khoái cảm — đòi hỏi thỏa mãn ngay lập tức.</li>
+  <li><strong>Ego:</strong> Phần điều phối, hoạt động theo nguyên tắc thực tế — cân bằng Id, Superego và thực tế xã hội.</li>
+  <li><strong>Superego:</strong> Lương tâm và lý tưởng đạo đức — nội tâm hóa các chuẩn mực từ cha mẹ và xã hội.</li>
+</ul>
+<h2>Tâm lý học phân tích — Carl Jung</h2>
+<p>Jung đồng ý với Freud về vai trò của vô thức, nhưng tiến xa hơn khi đề xuất <strong>Collective Unconscious</strong> — tầng vô thức sâu chứa các Archetype chung của toàn nhân loại. Ông cũng phân biệt tính hướng nội/ngoại và chức năng tâm lý (cảm giác, trực giác, tư duy, cảm xúc).</p>
+<h2>Tâm lý học nhân văn — Maslow & Rogers</h2>
+<p>Tháp nhu cầu Maslow: Sinh lý → An toàn → Tình yêu → Được tôn trọng → <strong>Tự thực hiện (Self-actualization)</strong>. Rogers nhấn mạnh Unconditional Positive Regard — chấp nhận vô điều kiện — là nền tảng để con người phát triển.</p>`
+      },
+      {
+        id:'l5', title:'Rối loạn lo âu — Nhận diện và hiểu đúng DSM-5',
+        duration:'16 phút', free:true,
+        essences:[
+          {id:'e13', text:'<strong>GAD:</strong> Lo lắng quá mức, khó kiểm soát ≥ 6 tháng, kèm ≥3 triệu chứng (căng cơ, mệt mỏi, khó tập trung, mất ngủ, cáu kỉnh, bồn chồn).'},
+          {id:'e14', text:'<strong>Panic Disorder = cơn panic tái diễn + lo lắng dai dẳng về cơn tiếp theo</strong> (anticipatory anxiety) và/hoặc thay đổi hành vi né tránh.'},
+          {id:'e15', text:'<strong>ERP (Exposure and Response Prevention)</strong> là gold standard cho OCD — phơi nhiễm với kích thích gây lo âu trong khi ngăn chặn hành vi nghi thức.'},
+        ],
+        quiz:[
+          {q:'DSM-5 yêu cầu GAD (Generalized Anxiety Disorder) kéo dài tối thiểu bao lâu?',opts:['2 tuần','1 tháng','3 tháng','6 tháng'],correct:3,explain:'DSM-5 yêu cầu lo lắng quá mức, khó kiểm soát trong <strong>ít nhất 6 tháng</strong>, kèm ≥3 triệu chứng (bồn chồn, dễ mệt, khó tập trung, dễ cáu, căng cơ, khó ngủ). Tiêu chí thời gian 6 tháng phân biệt GAD với lo âu tình huống bình thường.'},
+          {q:'Điều gì PHÂN BIỆT Panic Disorder với cơn panic đơn lẻ (isolated panic attack)?',opts:['Cơn panic kéo dài hơn 30 phút','Lo lắng dai dẳng về cơn tiếp theo và/hoặc thay đổi hành vi né tránh','Có nhiều triệu chứng thể chất hơn','Xảy ra không có nguyên nhân rõ ràng'],correct:1,explain:'Panic Disorder = cơn panic tái diễn + <strong>ít nhất 1 tháng</strong> sau đó có: (1) Lo lắng dai dẳng về cơn tiếp theo (<em>anticipatory anxiety</em>), HOẶC (2) Thay đổi hành vi né tránh đáng kể. Chỉ có cơn panic mà không có 2 tiêu chí này → không đủ chẩn đoán Panic Disorder.'},
+          {q:'ERP trong điều trị OCD là viết tắt của gì và hoạt động theo cơ chế nào?',opts:['Emotional Regulation Practice — kiểm soát cảm xúc','Exposure and Response Prevention — phơi nhiễm kèm ngăn chặn nghi thức','Evidence-based Relapse Prevention — phòng tái phát','Extended Relaxation Protocol — thư giãn kéo dài'],correct:1,explain:'<strong>ERP = Exposure and Response Prevention</strong>: cho người học tiếp xúc với kích thích gây lo âu (Exposure) trong khi ngăn chặn hành vi nghi thức (Response Prevention). Não học được rằng lo âu sẽ tự giảm mà không cần compulsion → <em>habituation</em>. Đây là gold standard cho OCD theo NICE và APA.'},
+        ],
+        content:`
+<p>Lo âu là phản ứng bình thường của não bộ trước nguy hiểm — nhưng khi nó xảy ra quá mức, kéo dài và cản trở cuộc sống, đó là rối loạn cần được đánh giá và điều trị.</p>
+<h2>GAD — Rối loạn lo âu lan tỏa</h2>
+<p>DSM-5 yêu cầu: Lo lắng quá mức về nhiều lĩnh vực, khó kiểm soát, kéo dài ≥6 tháng, kèm ≥3 trong 6 triệu chứng: bồn chồn, dễ mệt mỏi, khó tập trung, dễ cáu, căng cơ, khó ngủ.</p>
+<h2>Panic Disorder — Rối loạn hoảng loạn</h2>
+<p>Cơn panic (panic attack) là đợt sợ hãi/khó chịu dữ dội, đạt đỉnh trong vài phút, kèm ≥4 triệu chứng: tim đập mạnh, khó thở, đau ngực, chóng mặt, dị cảm, sợ "mất kiểm soát". Panic Disorder = cơn panic tái diễn + lo lắng dai dẳng về cơn tiếp theo.</p>
+<h2>OCD — Rối loạn ám ảnh cưỡng bức</h2>
+<p>OCD bao gồm: <strong>Obsessions</strong> (suy nghĩ xâm nhập, không muốn có) + <strong>Compulsions</strong> (hành vi/nghi thức nhằm giảm lo âu từ obsession). Điều trị: SSRI + ERP (Exposure and Response Prevention).</p>`
+      },
+      {
+        id:'l6', title:'CBT — Công cụ thay đổi tư duy & hành vi',
+        duration:'20 phút', free:false,
+        essences:[
+          {id:'e16', text:'CBT dựa trên mô hình ABC: A (Sự kiện) → B (Suy nghĩ/Niềm tin) → C (Cảm xúc & Hành vi). Can thiệp vào B để thay đổi C.'},
+        ],
+        content:''
+      }
+    ],
+    assessment:{
+      questions:[
+        {q:'Theo Freud, cấu trúc tâm lý nào hoạt động theo "nguyên tắc thực tế" (reality principle)?',opts:['Id','Ego','Superego','Unconscious'],correct:1,explain:'<strong>Ego</strong> hoạt động theo nguyên tắc thực tế — điều phối giữa đòi hỏi bản năng của Id và chuẩn mực đạo đức của Superego, tìm cách thỏa mãn nhu cầu phù hợp với thực tế.'},
+        {q:'Mô hình Big Five (OCEAN) gồm những chiều nhân cách nào?',opts:['Openness, Consciousness, Extraversion, Agreeableness, Neuroticism','Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism','Optimism, Conscientiousness, Empathy, Agreeableness, Narcissism','Openness, Curiosity, Extraversion, Agreeableness, Negativity'],correct:1,explain:'<strong>OCEAN = Openness, Conscientiousness</strong> (không phải Consciousness), <strong>Extraversion, Agreeableness, Neuroticism</strong>. Chú ý phân biệt Conscientiousness (tận tâm) với Consciousness (ý thức).'},
+        {q:'DSM-5 yêu cầu GAD kéo dài ít nhất bao lâu?',opts:['2 tuần','1 tháng','3 tháng','6 tháng'],correct:3,explain:'GAD yêu cầu lo lắng quá mức diễn ra trong <strong>ít nhất 6 tháng</strong>, cùng với ≥3 triệu chứng thể chất/tâm lý. Tiêu chí thời gian này phân biệt GAD với lo âu bình thường.'},
+        {q:'Điều gì phân biệt Panic Disorder với cơn panic đơn lẻ?',opts:['Cường độ cơn panic mạnh hơn','Lo lắng dai dẳng về cơn tiếp theo và/hoặc thay đổi hành vi','Có nhiều triệu chứng thể chất hơn','Cơn panic xảy ra ban đêm'],correct:1,explain:'Panic Disorder đòi hỏi cơn panic tái diễn VÀ <strong>ít nhất 1 tháng</strong> có lo lắng dai dẳng về cơn tiếp theo (anticipatory anxiety) và/hoặc thay đổi hành vi né tránh.'},
+        {q:'Liệu pháp nào được xem là gold standard cho OCD?',opts:['Psychoanalysis','EMDR','ERP (Exposure and Response Prevention)','Supportive therapy'],correct:2,explain:'<strong>ERP</strong> — phơi nhiễm có kiểm soát với kích thích gây lo âu trong khi ngăn chặn hành vi nghi thức — là phương pháp tâm lý hiệu quả nhất cho OCD, được NICE và APA khuyến nghị hàng đầu.'},
+      ]
+    }
   }
+];
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let savedEssences = new Set();
+let completedLessons = new Set();
+let assessmentPassed = new Set();
+let lessonQuizScores = {}; // { lessonId: { correct, total } }
+let currentCourseId = null;
+let currentLessonId = null;
+let currentArticleId = null;
+let quizQ = 0, quizCorrect = 0, quizAnswered = false;
+let quizQuestions = [];
+let quizCourseId = null;
+// Lesson quiz state
+let lq = { q:0, correct:0, answered:false, questions:[], lessonId:null };
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+function go(viewName) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + viewName).classList.add('active');
+  window.scrollTo(0,0);
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const nl = document.getElementById('nl-' + viewName);
+  if(nl) nl.classList.add('active');
 }
 
-/* ══════════════════════════════════════════════════════════════
-   ROUTING
-══════════════════════════════════════════════════════════════ */
-function switchDB(db) {
-  state.currentDB = db;
-  state.filters = { status: "", priority: "" };
-  document.querySelectorAll(".db-tab").forEach(t => t.classList.toggle("active", t.dataset.db === db));
-  updateSyncTime();
-  render();
+/* ══════════════════════════════════════════════════
+   LESSON QUIZ FUNCTIONS
+══════════════════════════════════════════════════ */
+function renderLQ() {
+  const q = lq.questions[lq.q];
+  lq.answered = false;
+  const isLast = lq.q === lq.questions.length - 1;
+  document.getElementById('lq-area').innerHTML = `
+    <div class="lq-card">
+      <div class="lq-q-meta">Câu ${lq.q+1} / ${lq.questions.length}</div>
+      <div class="lq-q-text">${q.q}</div>
+      <div class="lq-options" id="lq-opts">
+        ${q.opts.map((o,i)=>`
+          <button class="lq-option" onclick="pickLQ(${i})">
+            <span class="lq-opt-letter">${['A','B','C','D'][i]}</span>
+            <span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="lq-explain" id="lq-explain">${q.explain}</div>
+    </div>
+    <div class="lq-actions">
+      <button class="lq-btn-next" id="lq-btn-next" onclick="nextLQ()" style="display:none">
+        ${isLast ? 'Xem kết quả 📊' : 'Câu tiếp →'}
+      </button>
+    </div>`;
 }
 
-function switchView(view) {
-  state.currentView = view;
-  render();
-}
-
-/* ══════════════════════════════════════════════════════════════
-   FILTERS
-══════════════════════════════════════════════════════════════ */
-function getFilteredItems() {
-  const items = (state.data[state.currentDB]?.items || []);
-  return items.filter(item => {
-    if (state.filters.status    && item.status   !== state.filters.status)   return false;
-    if (state.filters.priority  && item.priority !== state.filters.priority) return false;
-    return true;
+function pickLQ(idx) {
+  if (lq.answered) return;
+  lq.answered = true;
+  const q = lq.questions[lq.q];
+  document.querySelectorAll('#lq-opts .lq-option').forEach((el, i) => {
+    el.style.pointerEvents = 'none';
+    if (i === q.correct) el.classList.add('correct');
+    else if (i === idx) el.classList.add('wrong');
   });
+  if (idx === q.correct) lq.correct++;
+  document.getElementById('lq-explain').classList.add('show');
+  document.getElementById('lq-btn-next').style.display = 'inline-flex';
 }
 
-function onFilterChange(field, val) {
-  state.filters[field] = val;
-  render();
+function nextLQ() {
+  lq.q++;
+  if (lq.q >= lq.questions.length) showLQResult();
+  else renderLQ();
 }
 
-/* ══════════════════════════════════════════════════════════════
-   RENDER ORCHESTRATOR
-══════════════════════════════════════════════════════════════ */
-function renderLoading() {
-  document.getElementById("main-content").innerHTML =
-    `<div class="loading"><span class="spinner"></span> Loading data…</div>`;
-}
-
-function render() {
-  const cfg = CONFIG.databases[state.currentDB];
-  const items = getFilteredItems();
-  const allItems = state.data[state.currentDB]?.items || [];
-
-  const html = `
-    <div class="view-toolbar">
-      <div class="view-title">${cfg.label}</div>
-      <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-        ${renderFilters(allItems)}
-        <div class="view-switcher">
-          <button class="view-btn ${state.currentView==='dashboard'?'active':''}" onclick="switchView('dashboard')">📊 Dashboard</button>
-          <button class="view-btn ${state.currentView==='kanban'?'active':''}"    onclick="switchView('kanban')">⬜ Kanban</button>
-          <button class="view-btn ${state.currentView==='calendar'?'active':''}"  onclick="switchView('calendar')">📅 Calendar</button>
-        </div>
-      </div>
+function showLQResult() {
+  const total = lq.questions.length;
+  const pct = Math.round(lq.correct / total * 100);
+  lessonQuizScores[lq.lessonId] = { correct: lq.correct, total };
+  const emoji = pct === 100 ? '🌟' : pct >= 67 ? '👍' : '📖';
+  const msg = pct === 100 ? 'Hoàn hảo!' : pct >= 67 ? 'Tốt lắm!' : 'Ôn lại một chút nhé!';
+  document.getElementById('lq-area').style.display = 'none';
+  const res = document.getElementById('lq-result');
+  res.innerHTML = `
+    <div class="lq-result-score">${lq.correct}<span class="lq-result-denom">/${total}</span></div>
+    <div class="lq-result-emoji">${emoji}</div>
+    <div class="lq-result-msg">${msg}</div>
+    <div class="lq-result-badges">
+      <span class="lq-badge lq-badge-correct">✓ ${lq.correct} đúng</span>
+      <span class="lq-badge lq-badge-wrong">✗ ${total - lq.correct} sai</span>
     </div>
-    ${state.currentView === 'dashboard' ? renderDashboard(items, allItems) :
-      state.currentView === 'kanban'    ? renderKanban(items) :
-                                          renderCalendar(items)}
-  `;
-  document.getElementById("main-content").innerHTML = html;
+    <button class="lq-retry-btn" onclick="restartLQ()">↺ Làm lại</button>`;
+  res.classList.add('show');
 }
 
-/* ══════════════════════════════════════════════════════════════
-   FILTERS BAR
-══════════════════════════════════════════════════════════════ */
-function renderFilters(items) {
-  const statuses   = [...new Set(items.map(i => i.status).filter(Boolean))];
-  const priorities = [...new Set(items.map(i => i.priority).filter(Boolean))];
-
-  const statusOpts = statuses.map(s =>
-    `<option value="${s}" ${state.filters.status===s?'selected':''}>${s}</option>`).join('');
-  const prioOpts = priorities.map(p =>
-    `<option value="${p}" ${state.filters.priority===p?'selected':''}>${p}</option>`).join('');
-
-  return `
-    <div class="filter-bar">
-      <select class="filter-select" onchange="onFilterChange('status',this.value)">
-        <option value="">All Statuses</option>${statusOpts}
-      </select>
-      ${priorities.length ? `
-      <select class="filter-select" onchange="onFilterChange('priority',this.value)">
-        <option value="">All Priorities</option>${prioOpts}
-      </select>` : ''}
-    </div>
-  `;
+function restartLQ() {
+  lq.q = 0; lq.correct = 0; lq.answered = false;
+  document.getElementById('lq-area').style.display = '';
+  document.getElementById('lq-result').classList.remove('show');
+  renderLQ();
 }
 
-/* ══════════════════════════════════════════════════════════════
-   DASHBOARD VIEW
-══════════════════════════════════════════════════════════════ */
-function renderDashboard(items, allItems) {
-  const total    = allItems.length;
-  const done     = allItems.filter(i => ["Done","Published"].includes(i.status)).length;
-  const inProg   = allItems.filter(i => i.status === "In Progress").length;
-  const blocked  = allItems.filter(i => i.status === "Blocked").length;
-  const pct      = total ? Math.round(done / total * 100) : 0;
-  const today    = new Date(); today.setHours(0,0,0,0);
-  const dateField= CONFIG.databases[state.currentDB].dateField;
-  const overdue  = allItems.filter(i =>
-    i[dateField] && new Date(i[dateField]) < today && !["Done","Published"].includes(i.status)
-  ).length;
-
-  // Status breakdown
-  const statusCounts = {};
-  allItems.forEach(i => { statusCounts[i.status] = (statusCounts[i.status]||0)+1; });
-  // Priority breakdown
-  const prioCounts = {};
-  allItems.forEach(i => { if(i.priority) prioCounts[i.priority] = (prioCounts[i.priority]||0)+1; });
-  // Tag breakdown
-  const tagCounts = {};
-  allItems.forEach(i => (i.tags||[]).forEach(t => { tagCounts[t] = (tagCounts[t]||0)+1; }));
-
-  const statusRows = Object.entries(statusCounts).sort((a,b)=>b[1]-a[1])
-    .map(([s,c]) => {
-      const sc = CONFIG.statusConfig[s] || { color: "#9ca3af" };
-      return `<div class="breakdown-row">
-        <div class="breakdown-name"><div class="breakdown-dot" style="background:${sc.color}"></div>${s}</div>
-        <span class="breakdown-count">${c}</span>
-      </div>`;
-    }).join('');
-
-  const prioRows = Object.entries(prioCounts).sort((a,b)=>b[1]-a[1])
-    .map(([p,c]) => {
-      const colors = { High:"#ef4444", Medium:"#f59e0b", Low:"#10b981" };
-      return `<div class="breakdown-row">
-        <div class="breakdown-name"><div class="breakdown-dot" style="background:${colors[p]||'#9ca3af'}"></div>${p}</div>
-        <span class="breakdown-count">${c}</span>
-      </div>`;
-    }).join('');
-
-  const tagRows = Object.entries(tagCounts).sort((a,b)=>b[1]-a[1]).slice(0,6)
-    .map(([t,c]) => `<div class="breakdown-row">
-      <div class="breakdown-name"><div class="breakdown-dot" style="background:#6366f1"></div>${t}</div>
-      <span class="breakdown-count">${c}</span>
-    </div>`).join('');
-
-  return `
-    <div class="stats-grid">
-      <div class="stat-card accent">
-        <div class="stat-label">Total</div>
-        <div class="stat-value">${total}</div>
-        <div class="stat-sub">items</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-label">Done</div>
-        <div class="stat-value">${done}</div>
-        <div class="stat-sub">${pct}% complete</div>
-        <div class="progress-bar-wrap" style="margin-top:.5rem"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="stat-card blue">
-        <div class="stat-label">In Progress</div>
-        <div class="stat-value">${inProg}</div>
-        <div class="stat-sub">active</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-label">Overdue</div>
-        <div class="stat-value">${overdue}</div>
-        <div class="stat-sub">past due date</div>
-      </div>
-      ${blocked ? `<div class="stat-card red">
-        <div class="stat-label">Blocked</div>
-        <div class="stat-value">${blocked}</div>
-        <div class="stat-sub">need attention</div>
-      </div>` : ''}
-    </div>
-    <div class="breakdown-grid">
-      ${statusRows ? `<div class="breakdown-card">
-        <div class="breakdown-title">By Status</div>${statusRows}
-      </div>` : ''}
-      ${prioRows ? `<div class="breakdown-card">
-        <div class="breakdown-title">By Priority</div>${prioRows}
-      </div>` : ''}
-      ${tagRows ? `<div class="breakdown-card">
-        <div class="breakdown-title">Top Tags</div>${tagRows}
-      </div>` : ''}
-    </div>
-  `;
+/* ══════════════════════════════════════════════════
+   RENDER HOME
+══════════════════════════════════════════════════ */
+function renderHome() {
+  // Articles (first 3)
+  document.getElementById('home-articles').innerHTML = ARTICLES.slice(0,3).map(a => articleCardHTML(a)).join('');
+  // Courses
+  document.getElementById('home-courses').innerHTML = COURSES.map(c => courseCardHTML(c)).join('');
 }
 
-/* ══════════════════════════════════════════════════════════════
-   KANBAN VIEW
-══════════════════════════════════════════════════════════════ */
-function renderKanban(items) {
-  const allStatuses = [...new Set(items.map(i => i.status).filter(Boolean))];
-  const ordered = CONFIG.kanbanOrder.filter(s => allStatuses.includes(s));
-  const rest    = allStatuses.filter(s => !CONFIG.kanbanOrder.includes(s));
-  const cols    = [...ordered, ...rest];
+function articleCardHTML(a) {
+  return `<div class="article-card" onclick="openArticle('${a.id}')">
+    <div class="article-card-body">
+      <div class="article-card-tag"><span class="tag ${a.tagClass}">${a.tag}</span></div>
+      <div class="article-card-title">${a.title}</div>
+      <div class="article-card-excerpt">${a.excerpt}</div>
+    </div>
+    <div class="article-card-foot">
+      <span class="article-meta">⏱ ${a.readTime}</span>
+      <span class="article-meta" style="color:var(--muted2)">Đọc ngay →</span>
+    </div>
+  </div>`;
+}
 
-  if (!cols.length) return `<div class="empty"><div class="empty-icon">📭</div><p>No items found</p></div>`;
+function courseCardHTML(c) {
+  const prog = getProgress(c.id);
+  return `<div class="course-card" onclick="openCourse('${c.id}')">
+    <div class="course-card-top">
+      <div class="course-icon ${c.iconClass}">${c.icon}</div>
+      <span class="tag ${c.tagClass}" style="margin-bottom:12px;display:inline-block">${c.tag}</span>
+      <div class="course-card-title">${c.title}</div>
+      <div class="course-card-desc">${c.desc}</div>
+    </div>
+    <div class="course-card-foot">
+      <div class="course-stat"><strong>${c.freeCount}</strong> bài miễn phí</div>
+      <div class="course-stat"><strong>${prog.done}/${c.lessonCount}</strong> bài học</div>
+      <div class="course-cta">${prog.done > 0 ? 'Tiếp tục →' : 'Bắt đầu →'}</div>
+    </div>
+  </div>`;
+}
 
-  const colsHtml = cols.map(status => {
-    const cards = items.filter(i => i.status === status);
-    const sc    = CONFIG.statusConfig[status] || { color: "#9ca3af", cls: "todo" };
-    return `
-      <div class="kanban-col">
-        <div class="kanban-col-header">
-          <span class="kanban-col-name" style="color:${sc.color}">${status}</span>
-          <span class="kanban-col-count">${cards.length}</span>
-        </div>
-        <div class="kanban-cards">${cards.map(c => renderCard(c)).join('') || '<div style="font-size:.78rem;color:var(--muted);text-align:center;padding:.5rem">Empty</div>'}</div>
+/* ══════════════════════════════════════════════════
+   ARTICLES
+══════════════════════════════════════════════════ */
+function renderArticles() {
+  document.getElementById('articles-grid').innerHTML = ARTICLES.map(a => articleCardHTML(a)).join('');
+}
+
+function openArticle(id) {
+  currentArticleId = id;
+  const a = ARTICLES.find(x => x.id === id);
+  document.getElementById('article-reader-content').innerHTML = a.content;
+  go('article-reader');
+}
+
+/* ══════════════════════════════════════════════════
+   COURSES
+══════════════════════════════════════════════════ */
+function renderCourses() {
+  document.getElementById('courses-grid').innerHTML = COURSES.map(c => courseCardHTML(c)).join('');
+}
+
+function openCourse(id) {
+  currentCourseId = id;
+  const c = COURSES.find(x => x.id === id);
+  const prog = getProgress(id);
+  const passed = assessmentPassed.has(id);
+
+  let lessonsHTML = c.lessons.map((l,i) => {
+    const done = completedLessons.has(l.id);
+    const locked = !l.free;
+    const qs = lessonQuizScores[l.id];
+    const quizBadge = qs ? `<span class="lq-score-badge">${qs.correct}/${qs.total} quiz</span>` : '';
+    return `<div class="lesson-row ${locked?'locked':''} ${done?'completed':''}" onclick="${locked ? "toast('🔒 Bài này cần Premium — sắp ra mắt!')" : `openLesson('${c.id}','${l.id}')`}">
+      <div class="lesson-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="lesson-info">
+        <div class="lesson-name">${l.title}</div>
+        <div class="lesson-sub">⏱ ${l.duration}${quizBadge ? ' · ' + quizBadge : ''}</div>
       </div>
-    `;
+      <div class="lesson-meta">
+        ${done ? '<span class="badge badge-done">✓ Xong</span>' : (locked ? '<span class="badge badge-pro">🔒 Premium</span>' : '<span class="badge badge-free">Miễn phí</span>')}
+      </div>
+    </div>`;
   }).join('');
 
-  return `<div class="kanban-board">${colsHtml}</div>`;
-}
+  const freeDone = c.lessons.filter(l => l.free && completedLessons.has(l.id)).length;
+  const freeTotal = c.lessons.filter(l => l.free).length;
+  const canAssess = freeDone >= freeTotal;
 
-function renderCard(item) {
-  const sc       = CONFIG.statusConfig[item.status] || { cls: "todo" };
-  const dateField= CONFIG.databases[state.currentDB].dateField;
-  const date     = item[dateField];
-  const today    = new Date(); today.setHours(0,0,0,0);
-  const isOverdue= date && new Date(date) < today && !["Done","Published"].includes(item.status);
-  const tags     = (item.tags || []).slice(0,2).map(t => `<span class="badge badge-tag">${t}</span>`).join('');
-  const prio     = item.priority ? `<span class="badge badge-priority-${item.priority.toLowerCase()}">${item.priority}</span>` : '';
-  const link     = item.url ? ` onclick="window.open('${item.url}','_blank')"` : '';
-
-  return `
-    <div class="card"${link}>
-      <div class="card-title">${escHtml(item.title || 'Untitled')}</div>
-      <div class="card-meta">
-        <span class="badge badge-status-${sc.cls}">${item.status}</span>
-        ${prio}${tags}
+  document.getElementById('course-detail-content').innerHTML = `
+    <button class="back-link" onclick="go('courses')">← Khóa học</button>
+    <div class="course-detail-head">
+      <div class="course-detail-icon ${c.iconClass}">${c.icon}</div>
+      <div>
+        <span class="tag ${c.tagClass}" style="margin-bottom:10px;display:inline-block">${c.tag}</span>
+        <h1>${c.title}</h1>
+        <p>${c.desc}</p>
       </div>
-      ${date ? `<div class="card-date${isOverdue?' overdue':''}">📅 ${fmtDate(date)}${isOverdue?' · Overdue':''}</div>` : ''}
-      ${item.assignee ? `<div class="card-assignee">👤 ${escHtml(item.assignee)}</div>` : ''}
     </div>
-  `;
+    <div class="progress-block">
+      <div class="progress-bar-wrap">
+        <div class="progress-label-row"><span>Tiến độ</span><span>${prog.done}/${c.lessonCount} bài học</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(prog.done/c.lessonCount*100)}%"></div></div>
+      </div>
+    </div>
+    <div class="sec-head"><h2 style="font-family:'Lora',serif;font-size:20px">Danh sách bài học</h2></div>
+    <div class="lessons-list">${lessonsHTML}</div>
+    <div class="assess-block ${passed ? 'assess-passed' : canAssess ? 'assess-ready' : ''}">
+      <div class="assess-block-icon">${passed ? '🎓' : canAssess ? '📝' : '🔒'}</div>
+      <div class="assess-block-text">
+        <h3>${passed ? 'Đã hoàn thành — chứng chỉ của bạn đang chờ!' : canAssess ? 'Sẵn sàng kiểm tra cuối khóa?' : 'Bài kiểm tra cuối khóa'}</h3>
+        <p>${passed
+          ? 'Bạn đã vượt qua bài kiểm tra. Xem lại chứng chỉ bất cứ lúc nào.'
+          : canAssess
+            ? 'Đạt 80% trở lên để nhận chứng chỉ hoàn thành khóa học.'
+            : `Hoàn thành ${freeTotal} bài miễn phí để mở khóa bài kiểm tra. (Cần đạt ≥80% để nhận chứng chỉ)`
+        }</p>
+      </div>
+      <div class="assess-block-actions">
+        ${passed
+          ? `<button class="btn btn-green" onclick="openCert('${c.id}')">🎓 Xem chứng chỉ</button>`
+          : `<button class="btn ${canAssess ? 'btn-dark' : 'btn-disabled'}" onclick="${canAssess ? `startAssessment('${c.id}')` : "toast('Hoàn thành tất cả bài miễn phí trước!')"}">
+              ${canAssess ? 'Bắt đầu kiểm tra →' : 'Chưa mở khóa'}
+            </button>`
+        }
+      </div>
+    </div>`;
+  go('course-detail');
 }
 
-/* ══════════════════════════════════════════════════════════════
-   CALENDAR VIEW
-══════════════════════════════════════════════════════════════ */
-function renderCalendar(items) {
-  const dateField = CONFIG.databases[state.currentDB].dateField;
-  const year  = state.calYear;
-  const month = state.calMonth;
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const days   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function getProgress(courseId) {
+  const c = COURSES.find(x => x.id === courseId);
+  const done = c.lessons.filter(l => completedLessons.has(l.id)).length;
+  return { done, total: c.lessons.length };
+}
 
-  // Build date → items map
-  const byDate = {};
-  items.forEach(item => {
-    const d = item[dateField];
-    if (!d) return;
-    const key = d.split("T")[0];
-    if (!byDate[key]) byDate[key] = [];
-    byDate[key].push(item);
+/* ══════════════════════════════════════════════════
+   LESSON
+══════════════════════════════════════════════════ */
+function openLesson(courseId, lessonId) {
+  currentCourseId = courseId;
+  currentLessonId = lessonId;
+  const c = COURSES.find(x => x.id === courseId);
+  const l = c.lessons.find(x => x.id === lessonId);
+  const li = c.lessons.indexOf(l);
+
+  // Mark complete
+  completedLessons.add(lessonId);
+
+  // Head
+  document.getElementById('lesson-head').innerHTML = `
+    <span class="tag ${c.tagClass}">${c.tag}</span>
+    <h1 style="margin-top:10px">${l.title}</h1>
+    <div class="lesson-head-meta">
+      <span style="font-size:13px;color:var(--muted)">⏱ ${l.duration}</span>
+    </div>`;
+
+  // Body + essence blocks
+  let essenceBlocks = l.essences.map(e => `
+    <div class="essence-block">
+      <div class="essence-icon">📌</div>
+      <div class="essence-content">
+        <div class="essence-label">Tinh chất cốt lõi</div>
+        <div class="essence-text">${e.text}</div>
+      </div>
+      <button class="essence-save-btn ${savedEssences.has(e.id)?'saved':''}" id="ebtn-${e.id}" onclick="toggleEssence('${e.id}','${l.title}','${c.title}')">
+        ${savedEssences.has(e.id) ? '✓ Đã lưu' : '📌 Lưu'}
+      </button>
+    </div>`).join('');
+
+  // Build lesson quiz HTML
+  lq = { q:0, correct:0, answered:false, questions: l.quiz || [], lessonId: l.id };
+  const lqHTML = (l.quiz && l.quiz.length > 0) ? `
+    <div class="lq-wrap" id="lq-wrap">
+      <div class="lq-divider"><span class="lq-divider-label">🧪 Kiểm tra nhanh bài học</span></div>
+      <div class="lq-sub">${l.quiz.length} câu hỏi · Kiểm tra lại những gì bạn vừa học</div>
+      <div id="lq-area"></div>
+      <div class="lq-result" id="lq-result"></div>
+    </div>` : '';
+
+  document.getElementById('lesson-body').innerHTML = l.content + essenceBlocks + lqHTML;
+  if (l.quiz && l.quiz.length > 0) renderLQ();
+
+  // Nav
+  const prev = li > 0 ? c.lessons[li-1] : null;
+  const next = li < c.lessons.length-1 ? c.lessons[li+1] : null;
+  document.getElementById('lesson-nav').innerHTML = `
+    ${prev ? `<button class="btn btn-ghost" onclick="openLesson('${courseId}','${prev.id}')">← ${prev.title.split('—')[0].trim()}</button>` : '<div></div>'}
+    ${next ? (next.free ? `<button class="btn btn-dark" onclick="openLesson('${courseId}','${next.id}')">Bài tiếp →</button>` : `<button class="btn btn-ghost" onclick="toast('🔒 Bài tiếp cần Premium!')">Bài tiếp (🔒) →</button>`) : `<button class="btn btn-dark" onclick="openCourse('${courseId}')">Về khóa học →</button>`}`;
+
+  document.getElementById('lesson-back-btn').onclick = () => openCourse(courseId);
+  updateSidebar(l);
+  updateFAB();
+  go('lesson');
+}
+
+function toggleEssence(id, lessonTitle, courseTitle) {
+  // Find essence data
+  let essenceText = '';
+  for(const c of COURSES) for(const l of c.lessons) {
+    const e = l.essences.find(x => x.id === id);
+    if(e) { essenceText = e.text; break; }
+  }
+  if(savedEssences.has(id)) {
+    savedEssences.delete(id);
+    const btn = document.getElementById('ebtn-'+id);
+    if(btn){ btn.classList.remove('saved'); btn.textContent = '📌 Lưu'; }
+    toast('Đã xóa khỏi sổ tay');
+  } else {
+    savedEssences.add(id);
+    const btn = document.getElementById('ebtn-'+id);
+    if(btn){ btn.classList.add('saved'); btn.textContent = '✓ Đã lưu'; }
+    toast('✓ Đã lưu vào sổ tay!');
+  }
+  // Update sidebar
+  const c = COURSES.find(x => x.id === currentCourseId);
+  if(c){ const l = c.lessons.find(x => x.id === currentLessonId); if(l) updateSidebar(l); }
+  updateFAB();
+  if(document.getElementById('notebook-drawer').classList.contains('open')) renderNotebook();
+}
+
+function updateSidebar(lesson) {
+  const saved = lesson.essences.filter(e => savedEssences.has(e.id));
+  document.getElementById('sidebar-count').textContent = saved.length;
+  if(saved.length === 0) {
+    document.getElementById('sidebar-essence-list').innerHTML = `<div class="sidebar-empty">Bấm <strong>📌 Lưu</strong> trên các khối tinh chất để ghi vào sổ tay.</div>`;
+  } else {
+    document.getElementById('sidebar-essence-list').innerHTML = saved.map(e => `
+      <div class="sidebar-essence-item">
+        <div class="sidebar-essence-text">${e.text.replace(/<[^>]+>/g,'')}</div>
+      </div>`).join('');
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   NOTEBOOK DRAWER
+══════════════════════════════════════════════════ */
+function openNotebook() {
+  renderNotebook();
+  document.getElementById('notebook-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+function closeNotebook() {
+  document.getElementById('notebook-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+function updateFAB() {
+  const fab = document.getElementById('fab');
+  document.getElementById('fab-count').textContent = savedEssences.size;
+  fab.classList.toggle('hidden', savedEssences.size === 0);
+}
+function renderNotebook() {
+  if(savedEssences.size === 0) {
+    document.getElementById('notebook-body').innerHTML = `<div class="drawer-empty">Sổ tay trống.<br>Bấm <strong>📌 Lưu</strong> trong các bài học để ghi lại tinh chất cốt lõi.</div>`;
+    return;
+  }
+  let html = '';
+  for(const c of COURSES) {
+    const courseEssences = [];
+    for(const l of c.lessons) {
+      for(const e of l.essences) {
+        if(savedEssences.has(e.id)) courseEssences.push({e, lessonTitle: l.title});
+      }
+    }
+    if(courseEssences.length === 0) continue;
+    html += `<div class="drawer-group">
+      <div class="drawer-group-label">${c.icon} ${c.title}</div>
+      ${courseEssences.map(({e,lessonTitle}) => `
+        <div class="drawer-item">
+          <button class="drawer-item-remove" onclick="toggleEssence('${e.id}')">✕</button>
+          <div class="drawer-item-text">${e.text.replace(/<[^>]+>/g,'')}</div>
+          <div class="drawer-item-source">${lessonTitle.split('—')[0].trim()}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('notebook-body').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════
+   ASSESSMENT
+══════════════════════════════════════════════════ */
+function startAssessment(courseId) {
+  quizCourseId = courseId;
+  const c = COURSES.find(x => x.id === courseId);
+  quizQuestions = c.assessment.questions;
+  quizQ = 0; quizCorrect = 0; quizAnswered = false;
+
+  // Get saved essences for this course
+  const notesForCourse = [];
+  for(const l of c.lessons) {
+    for(const e of l.essences) {
+      if(savedEssences.has(e.id)) notesForCourse.push(e.text.replace(/<[^>]+>/g,'').substring(0,80)+'…');
+    }
+  }
+
+  const notesHTML = notesForCourse.length > 0
+    ? `<div class="assess-notes-preview">
+        <div class="assess-notes-preview-label">📋 Từ sổ tay của bạn — ${notesForCourse.length} tinh chất đã lưu</div>
+        ${notesForCourse.map(n=>`<span class="assess-note-chip">${n}</span>`).join('')}
+       </div>`
+    : `<div style="font-size:13px;color:var(--muted);margin-top:12px">💡 Tip: Lưu tinh chất trong bài học để ôn lại trước khi kiểm tra.</div>`;
+
+  document.getElementById('assess-content').innerHTML = `
+    <div class="assess-head">
+      <span class="tag ${c.tagClass}">${c.tag}</span>
+      <h1 style="margin-top:10px">Kiểm tra: ${c.title}</h1>
+      <p>${quizQuestions.length} câu hỏi · Cần ≥ 80% để nhận chứng chỉ</p>
+      ${notesHTML}
+    </div>
+    <div class="q-progress-bar"><div class="q-progress-fill" id="q-prog" style="width:0%"></div></div>
+    <div class="q-meta">
+      <span class="q-counter" id="q-counter">Câu 1 / ${quizQuestions.length}</span>
+      <span class="tag ${c.tagClass}">${c.tag}</span>
+    </div>
+    <div id="q-area"></div>
+    <div class="result-box" id="q-result"></div>`;
+
+  document.getElementById('assess-back-btn').onclick = () => openCourse(courseId);
+  renderQuestion2();
+  go('assessment');
+}
+
+function renderQuestion2() {
+  const q = quizQuestions[quizQ];
+  quizAnswered = false;
+  document.getElementById('q-counter').textContent = `Câu ${quizQ+1} / ${quizQuestions.length}`;
+  document.getElementById('q-prog').style.width = `${quizQ/quizQuestions.length*100}%`;
+  document.getElementById('q-area').innerHTML = `
+    <div class="q-card">
+      <div class="q-text">${q.q}</div>
+      <div class="q-options">${q.opts.map((o,i)=>`
+        <button class="q-option" onclick="pickAnswer(${i})">
+          <span class="opt-letter">${['A','B','C','D'][i]}</span>${o}
+        </button>`).join('')}</div>
+      <div class="q-explain" id="q-explain">${q.explain}</div>
+    </div>
+    <div class="q-actions"><button class="btn-next" id="btn-next" onclick="nextQ()">${quizQ===quizQuestions.length-1?'Xem kết quả →':'Câu tiếp →'}</button></div>`;
+}
+
+function pickAnswer(idx) {
+  if(quizAnswered) return;
+  quizAnswered = true;
+  const q = quizQuestions[quizQ];
+  document.querySelectorAll('.q-option').forEach((el,i) => {
+    el.classList.add('disabled');
+    if(i===q.correct) el.classList.add('correct');
+    else if(i===idx) el.classList.add('wrong');
   });
-
-  const firstDay   = new Date(year, month, 1).getDay();
-  const daysInMon  = new Date(year, month + 1, 0).getDate();
-  const daysInPrev = new Date(year, month, 0).getDate();
-  const todayStr   = new Date().toISOString().split("T")[0];
-
-  const headerCells = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
-
-  let cells = '';
-  // Prev month padding
-  for (let i = 0; i < firstDay; i++) {
-    const d = daysInPrev - firstDay + 1 + i;
-    cells += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
-  }
-  // Current month
-  for (let d = 1; d <= daysInMon; d++) {
-    const dateStr  = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday  = dateStr === todayStr;
-    const dayItems = byDate[dateStr] || [];
-    const visible  = dayItems.slice(0, 3);
-    const more     = dayItems.length - visible.length;
-
-    const events = visible.map(item => {
-      const sc  = CONFIG.statusConfig[item.status] || { cls: "todo" };
-      const url = item.url ? ` href="${item.url}" target="_blank"` : '';
-      return `<a class="cal-event status-${sc.cls}"${url} title="${escHtml(item.title||'')}">${escHtml(item.title||'Untitled')}</a>`;
-    }).join('');
-
-    cells += `
-      <div class="cal-day${isToday?' today':''}">
-        <div class="cal-day-num">${d}</div>
-        <div class="cal-events">
-          ${events}
-          ${more > 0 ? `<div class="cal-more">+${more} more</div>` : ''}
-        </div>
-      </div>`;
-  }
-  // Next month padding
-  const total = firstDay + daysInMon;
-  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
-  for (let d = 1; d <= remaining; d++) {
-    cells += `<div class="cal-day other-month"><div class="cal-day-num">${d}</div></div>`;
-  }
-
-  return `
-    <div class="cal-nav">
-      <button class="cal-btn" onclick="calNav(-1)">‹</button>
-      <div class="cal-title">${months[month]} ${year}</div>
-      <button class="cal-btn" onclick="calNav(1)">›</button>
-      <button class="cal-btn" style="font-size:.78rem;width:auto;padding:0 .6rem;" onclick="calToday()">Today</button>
-    </div>
-    <div class="cal-grid">
-      ${headerCells}
-      ${cells}
-    </div>
-  `;
+  if(idx===q.correct) quizCorrect++;
+  document.getElementById('q-explain').classList.add('show');
+  document.getElementById('btn-next').classList.add('show');
 }
 
-function calNav(dir) {
-  state.calMonth += dir;
-  if (state.calMonth > 11) { state.calMonth = 0;  state.calYear++; }
-  if (state.calMonth < 0)  { state.calMonth = 11; state.calYear--; }
-  render();
+function nextQ() {
+  quizQ++;
+  if(quizQ >= quizQuestions.length) showResult();
+  else renderQuestion2();
 }
-function calToday() {
+
+function showResult() {
+  const total = quizQuestions.length;
+  const pct = Math.round(quizCorrect/total*100);
+  const passed = pct >= 80;
+  if(passed) assessmentPassed.add(quizCourseId);
+  document.getElementById('q-area').style.display='none';
+  document.getElementById('q-prog').style.width='100%';
+  const c = COURSES.find(x=>x.id===quizCourseId);
+  document.getElementById('q-result').innerHTML = `
+    <div class="result-score">${quizCorrect}<span class="result-denom">/${total}</span></div>
+    <div class="result-msg">${passed ? '🌟 Xuất sắc! Bạn đã vượt qua!' : pct>=60 ? '📖 Gần đúng rồi — ôn thêm và thử lại!' : '📚 Tiếp tục ôn tập và thử lại nhé!'}</div>
+    <div class="result-stats">
+      <div class="result-stat"><div class="result-stat-num" style="color:var(--green-mid)">${quizCorrect}</div><div class="result-stat-label">Đúng</div></div>
+      <div class="result-stat"><div class="result-stat-num" style="color:var(--red)">${total-quizCorrect}</div><div class="result-stat-label">Sai</div></div>
+      <div class="result-stat"><div class="result-stat-num" style="color:var(--blue-mid)">${pct}%</div><div class="result-stat-label">Điểm</div></div>
+    </div>
+    ${passed
+      ? `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-dark" onclick="openCert('${quizCourseId}')">🎓 Nhận chứng chỉ →</button>
+          <button class="btn btn-ghost" onclick="openCourse('${quizCourseId}')">Về khóa học</button>
+         </div>`
+      : `<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-dark" onclick="startAssessment('${quizCourseId}')">Thử lại</button>
+          <button class="btn btn-ghost" onclick="openCourse('${quizCourseId}')">Ôn bài thêm</button>
+         </div>`}`;
+  document.getElementById('q-result').classList.add('show');
+}
+
+/* ══════════════════════════════════════════════════
+   CERTIFICATE
+══════════════════════════════════════════════════ */
+function openCert(courseId) {
+  const c = COURSES.find(x => x.id === courseId);
   const now = new Date();
-  state.calMonth = now.getMonth();
-  state.calYear  = now.getFullYear();
-  render();
+  const dateStr = now.toLocaleDateString('vi-VN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  document.getElementById('cert-content').innerHTML = `
+    <div class="cert-logo">Bạn Cùng <em>Học</em></div>
+    <div class="cert-presented">Chứng nhận hoàn thành khóa học</div>
+    <div class="cert-name">Học viên</div>
+    <div class="cert-for">đã hoàn thành xuất sắc khóa học</div>
+    <div class="cert-course">${c.title}</div>
+    <div class="cert-seal">🎓</div>
+    <div style="font-size:13px;color:var(--muted2);max-width:380px;margin:0 auto;line-height:1.7">
+      Khóa học này bao gồm ${c.lessonCount} bài học chuyên sâu về ${c.tag}, với kiến thức được thẩm định từ nguồn học thuật uy tín.
+    </div>
+    <div class="cert-footer">
+      <div class="cert-footer-item">
+        <div class="cert-footer-label">Ngày cấp</div>
+        <div class="cert-footer-val">${dateStr}</div>
+      </div>
+      <div class="cert-footer-item">
+        <div class="cert-footer-label">Chứng nhận bởi</div>
+        <div class="cert-footer-val">Bạn Cùng Học</div>
+      </div>
+    </div>`;
+  document.getElementById('cert-actions').innerHTML = `
+    <button class="btn btn-ghost" onclick="openCourse('${courseId}')">← Về khóa học</button>
+    <button class="btn btn-dark" onclick="toast('Tính năng tải PDF sẽ sớm ra mắt!')">⬇ Tải PDF</button>
+    <button class="btn btn-green" onclick="toast('Tính năng chia sẻ sẽ sớm ra mắt!')">↗ Chia sẻ</button>`;
+  document.getElementById('cert-back-btn').onclick = () => openCourse(courseId);
+  go('certificate');
 }
 
-/* ══════════════════════════════════════════════════════════════
-   UTILS
-══════════════════════════════════════════════════════════════ */
-function fmtDate(str) {
-  if (!str) return '';
-  const d = new Date(str + (str.includes('T') ? '' : 'T00:00:00'));
-  return d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+function toast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+renderHome();
+renderArticles();
+renderCourses();
+
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') closeNotebook();
+});
 </script>
 </body>
 </html>
