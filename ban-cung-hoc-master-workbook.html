@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Workbook — Bạn Cùng Học</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f4ef;
+  --ink: #1a1814;
+  --surface: #ffffff;
+  --surface2: #f0ece4;
+  --border: #ddd8cc;
+  --border2: #c8c0b0;
+  --muted: #9a9080;
+  --muted2: #6a6050;
+
+  --o1: #1e4d38;
+  --o1-bg: #eaf4ee;
+  --o1-mid: #2d7a58;
+  --o1-border: #aed4c0;
+  --o1-text: #143628;
+
+  --o2: #2a3f72;
+  --o2-bg: #edf0f9;
+  --o2-mid: #3d5fba;
+  --o2-border: #b0c0e4;
+  --o2-text: #1a2848;
+
+  --o3: #5c2d70;
+  --o3-bg: #f4eefa;
+  --o3-mid: #8a4ab0;
+  --o3-border: #d0b0e4;
+  --o3-text: #3a1a48;
+
+  --warn: #c04a18;
+  --warn-bg: #fdf0ea;
+  --gold: #c07818;
+  --gold-bg: #fdf5e4;
+  --gold-border: #e8d090;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.72;
+  min-height: 100vh;
+}
+
+/* ── NAV / PROGRESS ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(247,244,239,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 46px;
+}
+
+.nav-tabs {
+  display: flex;
+  height: 100%;
+  gap: 0;
+  flex: 1;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--muted);
+  padding: 0 18px;
+  cursor: pointer;
+  height: 100%;
+  letter-spacing: 0.02em;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: var(--ink); }
+.nav-tab.active { color: var(--ink); font-weight: 500; border-bottom-color: var(--ink); }
+
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 20px;
+  border-left: 1px solid var(--border);
+  margin-left: 8px;
+}
+.progress-bar { width: 80px; height: 3px; background: var(--border); border-radius: 2px; overflow:hidden; }
+.progress-fill { height:100%; background: linear-gradient(90deg, var(--o1-mid), var(--o2-mid)); border-radius:2px; transition: width 0.4s; width:0%; }
+.progress-label { font-size: 11px; color: var(--muted); white-space:nowrap; }
+
+/* ── LAYOUT ── */
+.page { display: none; max-width: 920px; margin: 0 auto; padding: 56px 32px 100px; }
+.page.active { display: block; }
+
+@media(max-width:640px){ .page { padding: 36px 18px 80px; } }
+
+/* ── TYPOGRAPHY ── */
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before { content:''; width:20px; height:1px; background: var(--border2); }
+
+h1 {
+  font-family: 'Lora', serif;
+  font-size: clamp(34px,5.5vw,54px);
+  font-weight: 600;
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+h1 em { font-style: italic; font-weight: 400; }
+
+.lead {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.8;
+  max-width: 600px;
+  border-left: 2px solid var(--border2);
+  padding-left: 16px;
+  margin-top: 20px;
+}
+.lead strong { color: var(--ink); font-weight: 500; }
+
+h2 {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+/* ── DIVIDER ── */
+hr { border:none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* ════════════════════════════════
+   PAGE 0: OVERVIEW
+════════════════════════════════ */
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin: 32px 0;
+}
+@media(max-width:600px){ .overview-grid { grid-template-columns: 1fr; } }
+
+.ov-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.ov-label { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.ov-value { font-size: 14px; line-height: 1.55; color: var(--ink); }
+.ov-value strong { font-weight: 500; }
+
+.north-star-box {
+  background: var(--ink);
+  color: #d4d0c4;
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin: 32px 0;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.ns-icon { font-size: 28px; flex-shrink: 0; }
+.ns-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #7a7060; font-weight: 500; margin-bottom: 6px; }
+.ns-title { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: #f0e8d0; margin-bottom: 6px; }
+.ns-desc { font-size: 13.5px; color: #a09880; line-height: 1.7; }
+
+.flow-diagram {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 32px 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flow-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+  text-align: center;
+}
+.flow-box.active-box { background: var(--ink); color: #f0e8d0; border-color: var(--ink); }
+.flow-arrow { color: var(--muted); font-size: 14px; }
+
+.how-to-box {
+  background: var(--gold-bg);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  font-size: 13.5px;
+  color: #7a5010;
+  line-height: 1.75;
+  margin-top: 28px;
+}
+.how-to-box strong { color: var(--gold); font-weight: 500; }
+
+/* ════════════════════════════════
+   PAGE 1: OKR
+════════════════════════════════ */
+
+.okr-header-box {
+  background: var(--ink);
+  color: #c8c0b0;
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin-bottom: 36px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  font-size: 13.5px;
+}
+@media(max-width:580px){ .okr-header-box { grid-template-columns: 1fr; } }
+.okr-meta-label { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #6a6050; font-weight: 500; margin-bottom: 5px; }
+.okr-meta-value { color: #e0d8c4; line-height: 1.5; }
+.okr-meta-value strong { color: #f0d888; font-weight: 500; }
+
+/* Single objective */
+.objective {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.obj-top {
+  padding: 22px 26px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.obj-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+.badge-o1 { background: var(--o1); color: #c0e4d4; }
+.badge-o2 { background: var(--o2); color: #b8cce8; }
+.badge-o3 { background: var(--o3); color: #d4b8e8; }
+
+.obj-name {
+  font-family: 'Lora', serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+  margin-bottom: 5px;
+}
+.obj-why { font-size: 12.5px; color: var(--muted2); font-style: italic; line-height: 1.65; }
+
+/* KR rows */
+.kr-block { border-top: 1px solid var(--border); }
+
+.kr-row {
+  display: grid;
+  grid-template-columns: 52px 1fr 70px;
+  gap: 14px;
+  padding: 14px 26px;
+  border-bottom: 1px solid #f0ece4;
+  align-items: start;
+}
+.kr-row:last-child { border-bottom: none; }
+
+.kr-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  padding-top: 2px;
+}
+
+.kr-body {}
+.kr-text { font-size: 13.5px; line-height: 1.6; color: var(--ink); }
+.kr-metric {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.kr-note { font-size: 12px; color: var(--muted2); font-style: italic; margin-top: 4px; line-height: 1.55; }
+
+.kr-owner {
+  font-size: 11px;
+  font-weight: 500;
+  padding-top: 3px;
+  text-align: right;
+}
+.own-loc { color: var(--o1-mid); }
+.own-chuot { color: var(--o2-mid); }
+.own-both { color: var(--o3-mid); }
+
+/* Checkpoint strip */
+.checkpoint-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 32px 0;
+}
+@media(max-width:580px){ .checkpoint-strip { grid-template-columns: 1fr; } }
+
+.cp-item { padding: 16px 20px; border-right: 1px solid var(--border); background: var(--surface); }
+.cp-item:last-child { border-right: none; }
+.cp-when { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+.cp-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+.cp-desc { font-size: 12px; color: var(--muted2); line-height: 1.6; }
+
+/* Anti-goals */
+.anti-box {
+  background: var(--ink);
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin-top: 32px;
+}
+.anti-title { font-family: 'Lora', serif; font-size: 16px; color: #d8d0bc; font-weight: 600; margin-bottom: 14px; font-style: italic; }
+.anti-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #262420;
+  font-size: 13px;
+  color: #a09880;
+  line-height: 1.65;
+  align-items: baseline;
+}
+.anti-item:last-child { border-bottom: none; }
+.anti-x { color: #6a6050; flex-shrink: 0; font-size: 11px; }
+
+/* ════════════════════════════════
+   PAGE 2: BRAINSTORM
+════════════════════════════════ */
+
+/* OKR anchor label */
+.okr-anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+.anchor-o1 { background: var(--o1-bg); color: var(--o1-text); border: 1px solid var(--o1-border); }
+.anchor-o2 { background: var(--o2-bg); color: var(--o2-text); border: 1px solid var(--o2-border); }
+.anchor-o3 { background: var(--o3-bg); color: var(--o3-text); border: 1px solid var(--o3-border); }
+.anchor-found { background: #f8f4ec; color: #5a4820; border: 1px solid #d8c890; }
+
+.bs-section { margin-bottom: 52px; }
+
+.bs-section-title {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.bs-section-sub { font-size: 13px; color: var(--muted2); margin-bottom: 20px; }
+
+/* Question card */
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.q-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.q-card.resolved { border-color: var(--o1-border); background: var(--o1-bg); }
+
+.q-head {
+  padding: 16px 20px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 32px 1fr 20px;
+  gap: 12px;
+  align-items: start;
+  user-select: none;
+}
+.q-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); padding-top: 2px; }
+
+.q-priority { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; position: relative; top: -1px; }
+.p-must { background: #e04040; box-shadow: 0 0 5px rgba(224,64,64,0.5); }
+.p-soon { background: var(--gold); }
+.p-later { background: var(--border2); }
+
+.q-title { font-size: 14px; color: var(--ink); line-height: 1.55; }
+.q-title em { font-style: normal; font-weight: 500; border-bottom: 1px dashed var(--border2); }
+.q-chevron { color: var(--muted); font-size: 10px; padding-top: 4px; transition: transform 0.2s; text-align: right; }
+.q-card.open .q-chevron { transform: rotate(180deg); }
+
+.q-body {
+  display: none;
+  padding: 0 20px 18px 64px;
+  border-top: 1px solid var(--border);
+}
+.q-card.open .q-body { display: block; }
+
+.q-context {
+  font-size: 12.5px;
+  color: var(--muted2);
+  line-height: 1.7;
+  margin: 14px 0;
+  padding: 11px 14px;
+  background: var(--surface2);
+  border-radius: 5px;
+  border-left: 2px solid var(--border2);
+}
+.q-context strong { color: var(--muted2); font-weight: 500; }
+
+.tension-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+@media(max-width:560px){ .tension-row { grid-template-columns: 1fr; } }
+
+.t-box { padding: 11px 13px; border-radius: 5px; font-size: 12.5px; line-height: 1.6; }
+.t-pro { background: var(--o1-bg); border: 1px solid var(--o1-border); color: var(--o1-text); }
+.t-con { background: #fdecea; border: 1px solid #e8c0b8; color: #7a2818; }
+.t-label { font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; font-weight: 600; opacity: 0.7; margin-bottom: 5px; }
+
+.decision-zone { margin-top: 12px; }
+.dz-label {
+  font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--muted); font-weight: 500; margin-bottom: 7px;
+  display: flex; align-items: center; gap: 8px;
+}
+.dz-label::before { content: '→'; color: var(--o1-mid); }
+
+textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.65;
+  padding: 10px 13px;
+  resize: vertical;
+  min-height: 76px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+textarea:focus { border-color: var(--border2); }
+textarea::placeholder { color: var(--muted); }
+
+.resolve-btn {
+  margin-top: 9px;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11.5px;
+  padding: 5px 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.resolve-btn:hover { border-color: var(--o1-mid); color: var(--o1-mid); }
+.q-card.resolved .resolve-btn { background: var(--o1-bg); border-color: var(--o1-border); color: var(--o1-text); }
+.resolved-chip { display: none; font-size: 10px; color: var(--o1-mid); font-weight: 500; margin-left: 8px; }
+.q-card.resolved .resolved-chip { display: inline; }
+
+@media(max-width:560px){
+  .q-body { padding-left: 20px; }
+}
+
+/* ════════════════════════════════
+   PAGE 3: ACTION PLAN
+════════════════════════════════ */
+
+.ap-intro {
+  background: var(--warn-bg);
+  border: 1px solid #e8c0a0;
+  border-radius: 8px;
+  padding: 18px 22px;
+  font-size: 13.5px;
+  color: #7a3810;
+  line-height: 1.75;
+  margin-bottom: 36px;
+}
+.ap-intro strong { color: var(--warn); font-weight: 500; }
+
+/* Phase */
+.phase { margin-bottom: 48px; }
+
+.phase-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.phase-num {
+  font-family: 'Lora', serif;
+  font-size: 56px;
+  font-weight: 600;
+  color: var(--border2);
+  line-height: 0.9;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.phase-meta {}
+.phase-period { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.phase-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1.2; margin-bottom: 4px; }
+.phase-goal { font-size: 13px; color: var(--muted2); font-style: italic; }
+
+/* KR tags on tasks */
+.kr-tag {
+  display: inline-block;
+  font-size: 9.5px;
+  font-family: 'DM Mono', monospace;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 5px;
+  font-weight: 400;
+}
+.kr-tag-o1 { background: var(--o1-bg); color: var(--o1-mid); border: 1px solid var(--o1-border); }
+.kr-tag-o2 { background: var(--o2-bg); color: var(--o2-mid); border: 1px solid var(--o2-border); }
+.kr-tag-o3 { background: var(--o3-bg); color: var(--o3-mid); border: 1px solid var(--o3-border); }
+
+/* Week block */
+.month-block { margin-bottom: 24px; }
+
+.month-head {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.month-head::after { content:''; flex:1; height:1px; background: var(--border); }
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media(max-width:580px){ .tasks-grid { grid-template-columns: 1fr; } }
+
+.task-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 13px 15px;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.task-card:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
+.task-card.span2 { grid-column: 1/-1; }
+
+.task-owner { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+.to-loc { color: var(--o1-mid); }
+.to-chuot { color: var(--o2-mid); }
+.to-both { color: var(--o3-mid); }
+
+.task-text { font-size: 13.5px; line-height: 1.58; color: var(--ink); }
+.task-tags { margin-bottom: 6px; }
+
+/* Milestone */
+.milestone {
+  padding: 13px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+.m1 { background: var(--o1-bg); color: var(--o1-text); border: 1px solid var(--o1-border); }
+.m2 { background: var(--o2-bg); color: var(--o2-text); border: 1px solid var(--o2-border); }
+.m3 { background: var(--o3-bg); color: var(--o3-text); border: 1px solid var(--o3-border); }
+.m-icon { font-size: 16px; flex-shrink: 0; padding-top: 1px; }
+.milestone strong { font-weight: 500; }
+
+/* ════════════════════════════════
+   PAGE 4: SUMMARY
+════════════════════════════════ */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 28px 0;
+}
+@media(max-width:580px){ .summary-grid { grid-template-columns: 1fr; } }
+
+.sum-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.sum-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.sum-box textarea { border: 1px solid var(--border); background: var(--bg); min-height: 80px; }
+
+.export-btn {
+  background: var(--ink);
+  color: #f0e8d4;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s;
+}
+.export-btn:hover { opacity: 0.85; }
+
+.risk-item {
+  display: grid;
+  grid-template-columns: 24px 1fr 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  align-items: start;
+}
+.risk-item:last-child { border-bottom: none; }
+.risk-n { font-family: 'Lora', serif; font-size: 17px; color: var(--border2); font-weight: 600; }
+.risk-prob { color: #7a3010; line-height: 1.6; }
+.risk-sol { color: #1a5030; line-height: 1.6; }
+.risk-col-head { font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.page.active .obj-card,
+.page.active .phase,
+.page.active .bs-section { animation: fadeUp 0.4s ease both; }
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('overview')">Tổng quan</button>
+    <button class="nav-tab" onclick="showPage('okr')">OKR</button>
+    <button class="nav-tab" onclick="showPage('brainstorm')">Brainstorm</button>
+    <button class="nav-tab" onclick="showPage('action')">Action Plan</button>
+    <button class="nav-tab" onclick="showPage('summary')">Tổng kết</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0/15 quyết định</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE 0: TỔNG QUAN
+══════════════════════════════════════ -->
+<div class="page active" id="page-overview">
+  <div class="eyebrow">Bạn Cùng Học · Master Workbook · Tháng 6–11, 2026</div>
+  <h1>Kế hoạch <em>6 Tháng</em><br>Đầu Tiên</h1>
+  <div class="lead">
+    Tài liệu tích hợp duy nhất cho buổi brainstorm của Lộc & Chuột. Gồm <strong>OKR mục tiêu</strong>, <strong>15 câu hỏi quyết định</strong> cần thống nhất, và <strong>Action Plan</strong> gắn với từng mục tiêu cụ thể.
+  </div>
+
+  <hr>
+
+  <div class="flow-diagram">
+    <div class="flow-box">Vision 2031<br><small style="font-weight:300;color:#9a9080">Chiến lược</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active-box">OKR 6 tháng<br><small style="font-weight:300;color:#a09060">Đang xây</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Brainstorm<br><small style="font-weight:300;color:#9a9080">Quyết định</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">Action Plan<br><small style="font-weight:300;color:#9a9080">Hành động</small></div>
+  </div>
+
+  <div class="north-star-box">
+    <div class="ns-icon">⭐</div>
+    <div>
+      <div class="ns-label">North Star Metric</div>
+      <div class="ns-title">Time Spent Learning</div>
+      <div class="ns-desc">Tổng thời gian người dùng học và tương tác có chất lượng trên nền tảng. Mọi quyết định sản phẩm, nội dung, và kỹ thuật đều được lọc qua câu hỏi: "Điều này có tăng thời gian học thật sự không?"</div>
+    </div>
+  </div>
+
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-label">Giai đoạn</div>
+      <div class="ov-value"><strong>Bootstrapping</strong><br>Pre-revenue · 2 co-founders</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">Xuất phát điểm</div>
+      <div class="ov-value"><strong>Tờ giấy trắng</strong><br>Chưa có website, chưa có nội dung</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">Ngành ra mắt</div>
+      <div class="ov-value"><strong>Song song</strong><br>Dược học + Tâm lý học</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">OKR structure</div>
+      <div class="ov-value"><strong>1 Objective</strong><br>3 Key Results · 2 Checkpoints</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">Phân vai</div>
+      <div class="ov-value"><strong>Lộc</strong> — Nội dung & Học thuật<br><strong>Chuột</strong> — Kỹ thuật & Marketing</div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">Định nghĩa thành công</div>
+      <div class="ov-value">Sản phẩm chạy được + nội dung đủ tốt để người học <strong>muốn dùng thật</strong></div>
+    </div>
+  </div>
+
+  <div class="how-to-box">
+    <strong>Cách dùng tài liệu này:</strong> Đọc OKR trước để hiểu "đích đến". Sau đó vào Brainstorm để thống nhất các quyết định nền móng — mỗi câu hỏi được gắn với OKR cụ thể để rõ tại sao nó quan trọng. Cuối cùng, Action Plan là danh sách việc cụ thể đã được thiết kế để phục vụ các KR đó.<br><br>
+    Thanh tiến độ ở trên cùng theo dõi số câu hỏi brainstorm đã được quyết định.
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE 1: OKR
+══════════════════════════════════════ -->
+<div class="page" id="page-okr">
+  <div class="eyebrow">Mục tiêu & Đo lường</div>
+  <h1>OKR <em>6 Tháng</em></h1>
+  <div class="lead">1 Objective duy nhất, đủ tập trung cho giai đoạn xuất phát điểm. 3 Key Results là bằng chứng cụ thể để biết mình đang đi đúng hướng.</div>
+
+  <hr>
+
+  <div class="okr-header-box">
+    <div>
+      <div class="okr-meta-label">Chu kỳ</div>
+      <div class="okr-meta-value"><strong>6 tháng</strong> · Tháng 6–11/2026<br>+ 2 checkpoint giữa chừng</div>
+    </div>
+    <div>
+      <div class="okr-meta-label">Triết lý</div>
+      <div class="okr-meta-value">Giai đoạn 0→1 cần <strong>1 mục tiêu rõ</strong>, không phải nhiều mục tiêu mơ hồ. OKR giúp cắt bỏ, không phải thêm vào.</div>
+    </div>
+    <div>
+      <div class="okr-meta-label">Review cadence</div>
+      <div class="okr-meta-value">Weekly: liếc nhanh KR progress<br>Checkpoint T8: mid-review<br>Checkpoint T11: final retrospective</div>
+    </div>
+  </div>
+
+  <!-- THE OBJECTIVE -->
+  <div class="objective">
+    <div class="obj-top">
+      <div class="obj-badge badge-o1">O1</div>
+      <div>
+        <div class="obj-name">Xây được sản phẩm mà người học trong ngành Dược và Tâm lý muốn dùng thật sự</div>
+        <div class="obj-why">6 tháng đầu chỉ có một việc: chứng minh sản phẩm này xứng đáng tồn tại. Không có người dùng thật xác nhận, mọi thứ khác — marketing, monetize, scale — đều là xây trên cát.</div>
+      </div>
+    </div>
+    <div class="kr-block">
+      <div class="kr-row">
+        <div class="kr-id">KR 1.1</div>
+        <div class="kr-body">
+          <div class="kr-text">Website live với <span class="kr-metric">≥ 30 bài</span> (15 Dược + 15 Tâm lý), mỗi bài có tối thiểu 5 câu quiz — trước ngày <span class="kr-metric">31/7/2026</span>.</div>
+          <div class="kr-note">Đây là KR duy nhất hoàn toàn nằm trong tầm kiểm soát của hai bạn. Không đạt = vấn đề vận hành, không phải thị trường.</div>
+        </div>
+        <div class="kr-owner own-both">Cả hai</div>
+      </div>
+      <div class="kr-row">
+        <div class="kr-id">KR 1.2</div>
+        <div class="kr-body">
+          <div class="kr-text"><span class="kr-metric">≥ 70%</span> người dùng beta (10–15 người) đánh giá nội dung "chính xác và dễ hiểu" sau 2 tuần dùng thử — đo bằng khảo sát có câu hỏi cụ thể.</div>
+          <div class="kr-note">Bài kiểm tra chất lượng thực tế — không phải cảm tính của người viết. Nếu dưới 70%, phải dừng mở rộng và cải thiện nội dung hiện có trước.</div>
+        </div>
+        <div class="kr-owner own-loc">Lộc</div>
+      </div>
+      <div class="kr-row">
+        <div class="kr-id">KR 1.3</div>
+        <div class="kr-body">
+          <div class="kr-text">Ít nhất <span class="kr-metric">1 chuyên gia</span> (giảng viên / dược sĩ / chuyên gia tâm lý) đã đọc và xác nhận chất lượng học thuật của ≥ 10 bài — trước cuối tháng 11.</div>
+          <div class="kr-note">Bảo chứng chuyên môn là yếu tố tin cậy không thể tự phong. Cần xây quan hệ từ sớm, không phải đến khi cần mới tìm.</div>
+        </div>
+        <div class="kr-owner own-loc">Lộc</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKPOINTS -->
+  <div class="checkpoint-strip">
+    <div class="cp-item">
+      <div class="cp-when">Checkpoint · Tháng 8</div>
+      <div class="cp-title">Mid-review</div>
+      <div class="cp-desc">KR 1.1 đã đạt chưa? KR 1.2 đang ở đâu? Cần điều chỉnh gì không? Không set OKR mới — chỉ calibrate.</div>
+    </div>
+    <div class="cp-item">
+      <div class="cp-when">Checkpoint · Tháng 11</div>
+      <div class="cp-title">Final Retrospective</div>
+      <div class="cp-desc">Chấm điểm 3 KR (0.0–1.0). Rút 3 bài học. Dữ liệu để quyết định monetize và scale năm 2.</div>
+    </div>
+    <div class="cp-item">
+      <div class="cp-when">Tín hiệu nguy hiểm</div>
+      <div class="cp-title">Cần họp khẩn khi</div>
+      <div class="cp-desc">KR 1.2 dưới 50% sau beta. Lộc viết &gt;5 bài/tuần liên tục. Sync bị bỏ &gt;2 tuần liên tiếp.</div>
+    </div>
+  </div>
+
+  <!-- ANTI-GOALS -->
+  <div class="anti-box">
+    <div class="anti-title">Không phải mục tiêu của 6 tháng này</div>
+    <div class="anti-item"><span class="anti-x">✕</span><span>Doanh thu — monetize là mục tiêu năm 2. Bất kỳ nỗ lực nào để có tiền sớm đều ăn vào thời gian validate sản phẩm.</span></div>
+    <div class="anti-item"><span class="anti-x">✕</span><span>Follower mạng xã hội cao — vanity metric. 50 người học thật > 10,000 người follow không học.</span></div>
+    <div class="anti-item"><span class="anti-x">✕</span><span>AI Loop Feedback hoàn chỉnh — cần nền nội dung chất lượng trước. Đây là tính năng năm 2.</span></div>
+    <div class="anti-item"><span class="anti-x">✕</span><span>Website "hoàn hảo" về kỹ thuật — đủ để học được là đủ. Thời gian Chuột tiết kiệm được phải đổ vào nội dung và người dùng.</span></div>
+    <div class="anti-item"><span class="anti-x">✕</span><span>Mở rộng sang ngành thứ 3 — chiến lược đã chọn 2 ngành làm sâu. Rộng quá sớm = không ngành nào đủ sâu.</span></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     PAGE 2: BRAINSTORM
+══════════════════════════════════════ -->
+<div class="page" id="page-brainstorm">
+  <div class="eyebrow">Thảo luận nội bộ · Lộc & Chuột</div>
+  <h1>Brainstorm &<br><em>Quyết định</em></h1>
+  <div class="lead">15 câu hỏi nền móng cần thống nhất trước khi bắt đầu. Mỗi câu được <strong>gắn với KR cụ thể</strong> để rõ tại sao nó quan trọng. Mở từng câu, thảo luận, ghi quyết định, đánh dấu đã chốt.</div>
+
+  <hr>
+
+  <!-- ── GROUP 1: OKR liên quan ── -->
+  <div class="bs-section">
+    <div class="okr-anchor anchor-o1">● O1 · Sản phẩm & Nội dung</div>
+    <div class="bs-section-title">Sản phẩm & Nội dung</div>
+    <div class="bs-section-sub">Các quyết định ảnh hưởng trực tiếp đến KR 1.1 và KR 1.2</div>
+
+    <!-- Q1 -->
+    <div class="q-card" id="q1">
+      <div class="q-head" onclick="toggle('q1')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q1</div>
+        <div class="q-title">Ra mắt song song 2 ngành có thực sự khả thi với <em>1 người viết nội dung</em> không?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.1 & 1.2:</strong> Mục tiêu 30 bài chất lượng + 70% beta feedback tốt — song song 2 ngành có nghĩa là Lộc phải đạt cả hai tiêu chí này cho 2 lĩnh vực học thuật nặng cùng lúc. Đây là rủi ro lớn nhất của kế hoạch.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Lập luận song song</div>Mạng lưới người dùng rộng hơn ngay từ đầu. Dược + Tâm lý bổ trợ nhau (dược lý tâm thần). Tránh đặt cược vào 1 ngành khi chưa biết cái nào tăng trưởng nhanh hơn.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Lập luận đơn ngành</div>1 ngành sâu = 30 bài chất lượng cao vs 15+15 bài trung bình. Trust và Word-of-mouth đến từ độ sâu. Thị trường nhỏ dominant còn hơn thị trường lớn mờ nhạt.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Quyết định của hai bạn</div>
+          <textarea placeholder="Chúng tôi quyết định... vì... Nếu sau tháng 2 thấy chất lượng giảm thì sẽ..." data-q="q1"></textarea>
+          <button class="resolve-btn" onclick="resolve('q1', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-card" id="q2">
+      <div class="q-head" onclick="toggle('q2')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q2</div>
+        <div class="q-title">MVP là gì — <em>tối thiểu phải có những gì</em> để website live đúng deadline 31/7?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.1:</strong> Deadline 31/7 chỉ khả thi nếu cả hai biết chính xác "live" có nghĩa là gì. Không có ranh giới rõ, Chuột sẽ build tính năng không ai yêu cầu và Lộc sẽ chờ mà không biết chờ gì.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ MVP tối giản (2–3 tuần)</div>Trang danh sách bài → Trang bài đọc → Quiz cuối bài. Không cần tài khoản, không cần lưu tiến độ. Mục tiêu: người đọc được bài và làm được quiz.</div>
+          <div class="t-box t-con"><div class="t-label">✦ MVP có tính năng giữ chân (4–5 tuần)</div>Thêm: đăng ký tài khoản + lưu tiến độ. Tốn thêm thời gian nhưng có data người dùng thật từ ngày đầu để track North Star Metric.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Danh sách tính năng MVP đã thống nhất</div>
+          <textarea placeholder="Phải có khi live:&#10;...&#10;&#10;Thêm vào tháng 2–3:&#10;...&#10;&#10;Năm 2:&#10;..." data-q="q2"></textarea>
+          <button class="resolve-btn" onclick="resolve('q2', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-card" id="q3">
+      <div class="q-head" onclick="toggle('q3')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q3</div>
+        <div class="q-title">Template và quy trình duyệt bài — ai có <em>quyền phê duyệt cuối cùng</em> trước khi bài lên web?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.2 & 1.3:</strong> 70% beta feedback tốt và chuyên gia xác nhận chất lượng — cả hai KR này không đạt được nếu không có quy trình kiểm duyệt rõ từ bài đầu tiên. Một thông tin sai trong ngành Dược phá vỡ toàn bộ trust.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Lộc tự viết + tự kiểm</div>Nhanh hơn. Lộc là chuyên môn. Phù hợp bootstrapping khi chưa có Advisory Board.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Lộc viết + Chuột review độc giả</div>Chuột đóng vai "người đọc thường" — kiểm dễ hiểu, rõ ràng, không lỗi diễn đạt. Lộc giữ quyền kiểm duyệt học thuật. Tốn thêm 1 ngày/bài.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Quy trình duyệt bài đã thống nhất</div>
+          <textarea placeholder="Bước 1: ... → Bước 2: ... → Publish.&#10;Thời gian tối đa từ draft đến live: X ngày." data-q="q3"></textarea>
+          <button class="resolve-btn" onclick="resolve('q3', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="q-card" id="q4">
+      <div class="q-head" onclick="toggle('q4')">
+        <div class="q-num"><span class="q-priority p-soon"></span>Q4</div>
+        <div class="q-title">Lộc cam kết được <em>bao nhiêu giờ/tuần</em> thực tế — và kế hoạch dự phòng khi áp lực ngoài tăng?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.1:</strong> Toàn bộ timeline nội dung xây trên giả định Lộc duy trì đều đặn. Không có con số cam kết cụ thể, kỳ vọng của hai người sẽ khác nhau và dẫn đến bất đồng khi tiến độ chậm.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Kịch bản lạc quan</div>Lộc cam kết 15–20h/tuần. Đủ để ra 3–4 bài chất lượng. Timeline kế hoạch giữ nguyên.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Kịch bản thực tế hơn</div>Lộc đảm bảo 8–10h/tuần. Số bài mục tiêu điều chỉnh xuống 30–40%. Cần thêm 1 tháng đệm.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Cam kết & Kế hoạch dự phòng</div>
+          <textarea placeholder="Lộc cam kết: X giờ/tuần.&#10;Nếu 1 tuần không đạt: ...&#10;Nếu 2 tuần liên tiếp không đạt: ..." data-q="q4"></textarea>
+          <button class="resolve-btn" onclick="resolve('q4', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end bs-section 1 -->
+
+  <!-- ── GROUP 2: KỸ THUẬT ── -->
+  <div class="bs-section">
+    <div class="okr-anchor anchor-o2">● O1 · KR 1.1 · Kỹ thuật</div>
+    <div class="bs-section-title">Công nghệ & Vận hành</div>
+    <div class="bs-section-sub">Các quyết định ảnh hưởng trực tiếp đến deadline live và North Star Metric tracking</div>
+
+    <!-- Q5 -->
+    <div class="q-card" id="q5">
+      <div class="q-head" onclick="toggle('q5')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q5</div>
+        <div class="q-title">Stack công nghệ — <em>tự code hay nền tảng có sẵn</em>, quyết định này ảnh hưởng bao nhiêu đến deadline 31/7?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.1:</strong> Đây là quyết định ảnh hưởng nhiều nhất đến deadline. Tự code từ đầu có thể mất 6–10 tuần. Dùng nền tảng có sẵn có thể live trong 1–2 tuần. Sự khác biệt này kéo theo toàn bộ lịch nội dung của Lộc.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Nền tảng có sẵn (nhanh)</div>WordPress + LMS plugin, Webflow. Live trong 1–2 tuần. Chi phí thấp. Dễ thay đổi nội dung. Phù hợp để validate trước khi đầu tư technical lớn.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Tự build (kiểm soát cao)</div>Next.js / React. Chuột toàn quyền kiểm soát UX, scalable dài hạn. Nhưng tốn 6–10 tuần MVP đầu tiên — có thể lệch hoàn toàn kế hoạch nội dung.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Stack đã chọn & Điều kiện chuyển đổi</div>
+          <textarea placeholder="Chúng tôi dùng: ...&#10;Dự kiến website live ngày: ...&#10;Điều kiện để chuyển sang tự build: ..." data-q="q5"></textarea>
+          <button class="resolve-btn" onclick="resolve('q5', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="q-card" id="q6">
+      <div class="q-head" onclick="toggle('q6')">
+        <div class="q-num"><span class="q-priority p-soon"></span>Q6</div>
+        <div class="q-title">AI Loop Feedback — 6 tháng đầu có nên build không, hay đây là <em>bẫy scope creep</em> nguy hiểm nhất?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với Anti-goals:</strong> AI feedback được ghi trong chiến lược như tính năng cốt lõi — nhưng nó đòi hỏi prompt engineering kỹ lưỡng để không tạo thông tin sai y khoa, chi phí API, và thời gian dev đáng kể. Câu hỏi thật: người dùng cần quiz cơ bản trước hay AI feedback trước?</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Trì hoãn sang năm 2</div>100% tập trung vào nội dung chất lượng cao và quiz đơn giản. Khi có 100+ users thật thì mới biết họ thực sự cần AI feedback ở điểm nào. Build dựa trên nhu cầu thật.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Thử nghiệm nhỏ tháng 5–6</div>Tích hợp AI explanation đơn giản cho 1 bộ quiz có kiểm soát chặt. Mục tiêu: học hỏi, không phải scale. Chi phí thấp, rủi ro kiểm soát được.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Quyết định về AI trong 6 tháng đầu</div>
+          <textarea placeholder="AI sẽ/không được đưa vào giai đoạn này. Phạm vi nếu có: ...&#10;Điều kiện bắt buộc trước khi bật: ..." data-q="q6"></textarea>
+          <button class="resolve-btn" onclick="resolve('q6', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="q-card" id="q7">
+      <div class="q-head" onclick="toggle('q7')">
+        <div class="q-num"><span class="q-priority p-soon"></span>Q7</div>
+        <div class="q-title">Chuột sẽ tracking <em>chỉ số nào hàng tuần</em> để đo North Star Metric và báo cáo cho Lộc?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với North Star:</strong> "Time spent learning" là mũi tên vàng — nhưng không có hệ thống tracking cụ thể, chỉ số này chỉ là khái niệm trừu tượng. Cần biết: đo bằng gì, dashboard ở đâu, xem bao lâu 1 lần, ai xem.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Đơn giản (miễn phí)</div>Google Analytics + 1 bảng Notion tổng hợp số hàng tuần. Đủ để ra quyết định giai đoạn đầu, không tốn thời gian setup.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Chi tiết hơn</div>Thêm Hotjar heatmap — biết người dùng đọc đến đoạn nào thì dừng, click vào đâu nhiều nhất. Tốn thêm chi phí nhỏ nhưng insight sâu hơn nhiều.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Hệ thống đo lường đã thống nhất</div>
+          <textarea placeholder="Công cụ: ...&#10;5 chỉ số xem hàng tuần: ...&#10;Review data cùng nhau: [ngày] mỗi tuần." data-q="q7"></textarea>
+          <button class="resolve-btn" onclick="resolve('q7', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── GROUP 3: TĂNG TRƯỞNG ── -->
+  <div class="bs-section">
+    <div class="okr-anchor anchor-o1">● Hỗ trợ KR 1.2 & 1.3 · Phân phối</div>
+    <div class="bs-section-title">Tiếp cận người dùng</div>
+    <div class="bs-section-sub">Không có người dùng beta thật thì không thể đo KR 1.2 — và không có Advisory Board thì không thể đạt KR 1.3</div>
+
+    <!-- Q8 -->
+    <div class="q-card" id="q8">
+      <div class="q-head" onclick="toggle('q8')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q8</div>
+        <div class="q-title">Kênh đầu tiên để tìm 10–15 người dùng beta là gì — và <em>ai chịu trách nhiệm</em> tìm họ?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.2:</strong> Cần 10–15 người dùng beta trước tháng 8 để đo KR 1.2. Nếu không có kế hoạch cụ thể để tìm họ, KR này sẽ bị block. Beta users phải là sinh viên/người học Dược hoặc Tâm lý thật sự — không phải bạn bè thân thiết sẽ cho feedback đẹp.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Network cá nhân (nhanh nhất)</div>Bạn học cũ, đồng môn đang học Dược/Tâm lý. Dễ tiếp cận, feedback thẳng thắn hơn người lạ. Nhưng có thể bị confirmation bias.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Groups sinh viên (khách quan hơn)</div>Facebook groups sinh viên Dược UMP/HUMP, groups Tâm lý học. Người dùng không biết hai bạn = feedback khách quan hơn nhiều. Nhưng cần nội dung đủ tốt để thuyết phục họ thử.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Kế hoạch tìm beta users</div>
+          <textarea placeholder="Kênh tìm: ...&#10;Ai chịu trách nhiệm: ...&#10;Deadline có đủ 10 người: ..." data-q="q8"></textarea>
+          <button class="resolve-btn" onclick="resolve('q8', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="q-card" id="q9">
+      <div class="q-head" onclick="toggle('q9')">
+        <div class="q-num"><span class="q-priority p-soon"></span>Q9</div>
+        <div class="q-title">Advisory Board — tiếp cận <em>khi nào và với đề nghị gì cụ thể</em> để họ thực sự muốn tham gia?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với KR 1.3:</strong> Người có tên tuổi trong ngành y dược bận rộn. Nếu chỉ tiếp cận bằng "tầm nhìn đổi mới giáo dục" mà chưa có gì trong tay, cơ hội thấp. Cần chiến thuật cụ thể, không phải ý định chung chung.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Tiếp cận sớm (tháng 6–7)</div>Mời họ là người đầu tiên review bài mẫu — tôn trọng chuyên môn, không đòi hỏi nhiều. Nếu họ thích nội dung, bảo chứng đến tự nhiên.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Chờ có sản phẩm (tháng 9–10)</div>Đến với website đã live + 30 bài + vài chục người dùng. Bằng chứng cụ thể thuyết phục hơn lời hứa. Nhưng có thể trễ so với KR 1.3.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Kế hoạch tiếp cận Advisory Board</div>
+          <textarea placeholder="Tháng X: tiếp cận ai trước?&#10;Đề nghị cụ thể: ...&#10;Ai trong hai bạn chịu trách nhiệm: ..." data-q="q9"></textarea>
+          <button class="resolve-btn" onclick="resolve('q9', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="q-card" id="q10">
+      <div class="q-head" onclick="toggle('q10')">
+        <div class="q-num"><span class="q-priority p-later"></span>Q10</div>
+        <div class="q-title">Sau khi có đủ beta feedback — kênh tăng trưởng nào để <em>mở rộng ra ngoài network cá nhân</em>?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với giai đoạn tháng 3–6:</strong> Câu hỏi này chỉ cần trả lời sau khi KR 1.2 đã được validate. Nếu beta feedback tốt, lúc đó mới đáng đầu tư vào mở rộng. Đặt ra ở đây để hai bạn có hướng suy nghĩ trước.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Community-first</div>Seeding vào Facebook groups sinh viên Dược/Tâm lý. Organic, không tốn tiền. Feedback nhanh. Không cần content riêng cho kênh này.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Content-first (TikTok/SEO)</div>TikTok cần format video riêng — effort khác hoàn toàn với bài viết. SEO mất 3–6 tháng. Cả hai cần thời gian độc lập với việc viết nội dung.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Kênh ưu tiên sau tháng 3</div>
+          <textarea placeholder="Kênh chính: ...&#10;KPI đo hiệu quả: ...&#10;Ai chịu trách nhiệm kênh này: ..." data-q="q10"></textarea>
+          <button class="resolve-btn" onclick="resolve('q10', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── GROUP 4: TÀI CHÍNH ── -->
+  <div class="bs-section">
+    <div class="okr-anchor anchor-found">● Nền móng · Tài chính & Bền vững</div>
+    <div class="bs-section-title">Tài chính & Rủi ro</div>
+    <div class="bs-section-sub">Không liên quan trực tiếp đến KR — nhưng nếu không thống nhất, đây sẽ là nguồn bất đồng phá vỡ dự án từ bên trong</div>
+
+    <!-- Q11 -->
+    <div class="q-card" id="q11">
+      <div class="q-head" onclick="toggle('q11')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q11</div>
+        <div class="q-title">Chi phí 6 tháng đầu ước tính là bao nhiêu — và <em>ai trả, chia thế nào</em>?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Tại sao nói thẳng từ đầu:</strong> Tiền là nguyên nhân bất đồng phổ biến nhất giữa co-founders giai đoạn đầu. Chi phí ước tính thực tế: domain (~300k/năm) + hosting (~500k–2M/tháng) + tools. Tổng khoảng 3–8 triệu/tháng.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Chia đều 50/50</div>Đơn giản, công bằng về mặt nguyên tắc. Phù hợp khi cả hai đóng góp thời gian ngang nhau.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Cần thảo luận nếu đóng góp lệch</div>Nếu một người đầu tư tài chính nhiều hơn hoặc thời gian lệch đáng kể, cần thỏa thuận rõ để tránh bất mãn âm thầm.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Ngân sách & Quy tắc chia sẻ chi phí</div>
+          <textarea placeholder="Chi phí ước tính/tháng: ...&#10;Chia như sau: ...&#10;Ngân sách tối đa 6 tháng chấp nhận được: ..." data-q="q11"></textarea>
+          <button class="resolve-btn" onclick="resolve('q11', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="q-card" id="q12">
+      <div class="q-head" onclick="toggle('q12')">
+        <div class="q-num"><span class="q-priority p-soon"></span>Q12</div>
+        <div class="q-title">Nếu tháng 8 KR 1.2 dưới 50% — <em>khi nào thì pivot, khi nào thì tiếp tục và điều chỉnh</em>?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Gắn với Checkpoint tháng 8:</strong> Khi đang ở trong dự án, rất khó nhìn khách quan để quyết định "tiếp tục hay dừng". Định nghĩa trước ngưỡng này giúp hai bạn ra quyết định dựa trên tiêu chí đã thống nhất, không phải cảm xúc nhất thời.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Tín hiệu tiếp tục</div>Dù số lượng thấp, nếu có 10–15 người thật quay lại đều đặn và feedback tích cực — đó là product-market fit đang hình thành. Tiếp tục và điều chỉnh kênh phân phối.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Tín hiệu cần xem lại nghiêm túc</div>KR 1.2 dưới 50%, không có người tự nhiên chia sẻ nội dung, và không ai trong network nghề nghiệp biết đến. Lúc này cần xem lại format nội dung, không phải marketing.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Ngưỡng quyết định tại checkpoint tháng 8</div>
+          <textarea placeholder="Nếu thấy [X], chúng tôi họp khẩn và pivot format/approach.&#10;Nếu thấy [Y], chúng tôi tự tin tiếp tục và tăng tốc." data-q="q12"></textarea>
+          <button class="resolve-btn" onclick="resolve('q12', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── GROUP 5: CO-FOUNDERS ── -->
+  <div class="bs-section">
+    <div class="okr-anchor anchor-found">● Nền móng · Co-founder Dynamics</div>
+    <div class="bs-section-title">Quan hệ Co-founders</div>
+    <div class="bs-section-sub">Quyết định ở đây không đo được bằng KR — nhưng nếu sai, mọi KR đều trở nên vô nghĩa</div>
+
+    <!-- Q13 -->
+    <div class="q-card" id="q13">
+      <div class="q-head" onclick="toggle('q13')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q13</div>
+        <div class="q-title">Vùng quyền quyết định của mỗi người — những <em>vùng xám nào mà cả hai đều nghĩ là của mình</em>?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Tại sao đây là câu hỏi quan trọng nhất:</strong> Phân vai rõ trên giấy: Lộc = nội dung, Chuột = kỹ thuật. Nhưng thực tế nhiều quyết định nằm ở giao thoa — cấu trúc trang bài học, giọng điệu social, bài nào featured trang chủ, thời điểm ra tính năng mới. Không rõ = bất đồng thường xuyên.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Vùng giao thoa phổ biến</div>Cấu trúc trang bài học (Lộc muốn gì vs Chuột build được gì). Caption social. Quyết định "bài nào featured". Thời điểm ra tính năng mới.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Cơ chế xử lý đề xuất</div>Ai muốn thay đổi vùng của người kia: viết 3 dòng lý do, người kia có 48h phản hồi. Nếu không đồng ý: người có chuyên môn lĩnh vực đó quyết (như đã ghi trong chiến lược).</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Bản đồ quyền quyết định</div>
+          <textarea placeholder="Lộc quyết độc lập: ...&#10;Chuột quyết độc lập: ...&#10;Phải bàn cùng nhau: ...&#10;Khi không đồng ý: ..." data-q="q13"></textarea>
+          <button class="resolve-btn" onclick="resolve('q13', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="q-card" id="q14">
+      <div class="q-head" onclick="toggle('q14')">
+        <div class="q-num"><span class="q-priority p-must"></span>Q14</div>
+        <div class="q-title">Nhịp làm việc hàng tuần — <em>họp bao lâu, check-in thế nào</em>, và ai track task chung?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Tại sao cần thiết lập ngay tuần 1:</strong> Không có nhịp rõ ràng, hai người sẽ có kỳ vọng khác nhau về tốc độ, dễ dẫn đến "tôi tưởng bạn đang làm chuyện đó." Thiết lập được nhịp tuần đầu = cả 6 tháng chạy trơn tru hơn nhiều.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ Async nhẹ nhàng</div>Mỗi người cập nhật 3 dòng Notion mỗi thứ 2 (làm gì, kẹt ở đâu, cần gì). Gặp video call mỗi 2 tuần 1 lần, 30–45 phút.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Sync chặt chẽ hơn</div>Weekly call 30 phút mỗi thứ 2. Notion/Linear board task rõ ràng. Monthly review nhìn lại OKR. Tốn thêm thời gian nhưng giảm rủi ro drift.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Nhịp làm việc đã thống nhất</div>
+          <textarea placeholder="Sync: [ngày, thời lượng, format].&#10;Công cụ task: ...&#10;Cách báo khi bị block: ..." data-q="q14"></textarea>
+          <button class="resolve-btn" onclick="resolve('q14', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q15 -->
+    <div class="q-card" id="q15">
+      <div class="q-head" onclick="toggle('q15')">
+        <div class="q-num"><span class="q-priority p-later"></span>Q15</div>
+        <div class="q-title">Equity và ownership — đã được <em>nói thẳng và đồng thuận</em> chưa, hay đang để ngỏ?</div>
+        <div class="q-chevron">▼</div>
+      </div>
+      <div class="q-body">
+        <div class="q-context"><strong>Tại sao dù khó cũng phải hỏi:</strong> Nhiều startup tan vỡ không phải vì sản phẩm thất bại, mà vì co-founders có kỳ vọng khác nhau về ownership mà không ai nói ra. Chưa có doanh thu không có nghĩa là chưa cần thống nhất — ngược lại, làm sớm khi còn không có gì để tranh là dễ nhất.</div>
+        <div class="tension-row">
+          <div class="t-box t-pro"><div class="t-label">✦ 50/50 đơn giản</div>Bình đẳng, không ai cảm thấy ít giá trị hơn. Phù hợp khi cả hai đóng góp ngang nhau về thời gian và công sức.</div>
+          <div class="t-box t-con"><div class="t-label">✦ Cần xem lại nếu đóng góp lệch</div>Nếu một người đóng góp tài chính nhiều hơn, hoặc thời gian thực tế lệch nhau đáng kể, 50/50 có thể dẫn đến bất mãn âm thầm về sau.</div>
+        </div>
+        <div class="decision-zone">
+          <div class="dz-label">Thỏa thuận co-founders (nội bộ)</div>
+          <textarea placeholder="Ownership hiện tại: ...&#10;Điều kiện điều chỉnh: ...&#10;Nếu một người muốn rút lui: ..." data-q="q15"></textarea>
+          <button class="resolve-btn" onclick="resolve('q15', event)">✓ Đã chốt <span class="resolved-chip">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end brainstorm page -->
+
+
+<!-- ══════════════════════════════════════
+     PAGE 3: ACTION PLAN
+══════════════════════════════════════ -->
+<div class="page" id="page-action">
+  <div class="eyebrow">Kế hoạch hành động</div>
+  <h1>Action Plan<br><em>6 Tháng</em></h1>
+  <div class="lead">Mỗi nhiệm vụ được gắn tag KR tương ứng. Nếu một việc không phục vụ KR nào — đó là tín hiệu để xem lại có nên làm không.</div>
+
+  <div class="ap-intro" style="margin-top:28px;">
+    <strong>Nguyên tắc vàng:</strong> Đừng xây hoàn hảo — hãy xây đủ nhanh để học. Mục tiêu không phải là website đẹp, mà là bằng chứng rằng <strong>người thật muốn dùng sản phẩm này</strong>. Mọi quyết định đều được lọc qua câu hỏi: "Điều này có giúp đạt KR nhanh hơn không?"
+  </div>
+
+  <hr>
+
+  <!-- ── PHASE 1 ── -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">1</div>
+      <div class="phase-meta">
+        <div class="phase-period">Tháng 6–7 · 8 tuần</div>
+        <div class="phase-title">Xây khung — Đừng xây nhà</div>
+        <div class="phase-goal">Đích đến: Website live + 30 bài mẫu + beta testing bắt đầu → phục vụ KR 1.1 & 1.2</div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 6 — Setup & Foundation</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">KR 1.1</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Chọn stack và dựng website. Ưu tiên tốc độ: WordPress + LMS plugin hoặc Webflow. Không tự code từ đầu — đó là việc của năm 2.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">KR 1.1</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Đăng ký domain, setup hosting, cài Google Analytics + Hotjar (nếu chọn) từ ngày đầu để tracking North Star Metric ngay khi có người dùng đầu tiên.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.1 & 1.2</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Lập danh sách 20 chủ đề ưu tiên mỗi ngành. Tiêu chí chọn: hay bị hỏi thi nhất + dễ gây nhầm lẫn nhất. Đây là backlog nội dung cho cả 6 tháng.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Thiết lập template chuẩn cho 1 bài viết: Tóm tắt → Giải thích → Ứng dụng lâm sàng → Quiz 5 câu. Đây là khuôn đúc mọi nội dung sau — phải được Chuột đọc và đồng thuận về UX.</div>
+        </div>
+        <div class="task-card span2">
+          <div class="task-tags"><span class="kr-tag kr-tag-o3">Nền móng</span></div>
+          <div class="task-owner to-both">🤝 Cả hai</div>
+          <div class="task-text">Họp kickoff tuần 1: thống nhất brand guide (màu sắc, giọng văn), quy ước làm việc hàng tuần, bản phân vai quyền quyết định (từ Q13), và công cụ task chung. Ghi tất cả vào Notion.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 7 — Nội dung mẫu + Soft launch</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.1 & 1.2</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Viết 15 bài Dược + 15 bài Tâm lý theo template đã duyệt. Mỗi bài kèm 5 câu quiz. Hard limit: không quá 5 bài/tuần tổng cộng — chất lượng quan trọng hơn số lượng.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">KR 1.1</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Hoàn thiện giao diện: trang chủ, trang danh sách bài, trang bài đọc, trang quiz. Đảm bảo mobile-friendly và tải trang dưới 3 giây. Deadline cứng: 31/7.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2</span></div>
+          <div class="task-owner to-both">🤝 Cả hai</div>
+          <div class="task-text">Mời 10–15 beta users (sinh viên Dược & Tâm lý). Gửi khảo sát sau 2 tuần dùng thử. Thu thập feedback thô — không cần polish, cần phản hồi thật để đo KR 1.2.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.3</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Tiếp cận 1–2 chuyên gia tiềm năng cho Advisory Board. Đề nghị cụ thể: đọc 5 bài mẫu và cho feedback học thuật. Không cần cam kết chính thức ngay — chỉ cần mở đầu cuộc trò chuyện.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="milestone m1">
+      <span class="m-icon">🏁</span>
+      <span><strong>Cột mốc Tháng 7:</strong> Website live với 30 bài (KR 1.1 ✓). Khảo sát beta đang chạy. Đã nói chuyện với ít nhất 1 chuyên gia. Checkpoint đầu tiên: KR 1.2 đang ở đâu?</span>
+    </div>
+  </div>
+
+  <!-- ── PHASE 2 ── -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">2</div>
+      <div class="phase-meta">
+        <div class="phase-period">Tháng 8–9 · 8 tuần</div>
+        <div class="phase-title">Học từ data — Điều chỉnh và tăng tốc</div>
+        <div class="phase-goal">Đích đến: Biết rõ bài nào hoạt động, tại sao, và kênh nào mang người dùng có chất lượng → phục vụ KR 1.2 & tăng trưởng</div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 8 — Checkpoint & Tối ưu</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2</span></div>
+          <div class="task-owner to-both">🤝 Cả hai</div>
+          <div class="task-text"><strong>Mid-review checkpoint:</strong> Tổng hợp kết quả khảo sát beta. KR 1.2 đạt chưa? Nếu dưới 70%: dừng mở rộng, cải thiện nội dung hiện có trước. Nếu đạt: chuyển sang tăng trưởng.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">North Star</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Phân tích data Analytics: bài nào được đọc nhiều nhất? Người dùng rời trang ở đâu? Time on page trung bình là bao nhiêu? Top 5 insight này định hướng nội dung 3 tháng còn lại.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Dựa trên data: cải thiện 5 bài có time on page thấp nhất. Thêm ví dụ thực tế, sơ đồ, hoặc viết lại cấu trúc nếu người dùng bỏ đọc giữa chừng.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o3">KR 1.3</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Follow up với chuyên gia đã tiếp cận tháng 7. Nếu phản hồi tốt: đề nghị xác nhận chất lượng 10 bài chính thức (để đạt KR 1.3). Nếu chưa có phản hồi: tiếp cận người thứ 2.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 9 — Mở rộng nội dung & Kênh phân phối</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.1+</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Đẩy thêm 20 bài mới dựa trên top topics từ data tháng 8. Không dàn đều — tập trung vào loại bài đã chứng minh có time on page cao.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">Tăng trưởng</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Khai thác kênh phân phối đã được xác định. Nếu community (groups sinh viên): seeding chủ động mỗi tuần. Nếu SEO: tối ưu meta description top 10 bài. Chỉ 1 kênh, làm thật sâu.</div>
+        </div>
+        <div class="task-card span2">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">North Star</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Thêm tính năng lưu tiến độ học (bookmark bài, lịch sử làm quiz). Đây là tính năng giữ chân người dùng quay lại quan trọng nhất — trực tiếp tác động đến North Star Metric.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="milestone m2">
+      <span class="m-icon">🏁</span>
+      <span><strong>Cột mốc Tháng 9:</strong> KR 1.2 đã đạt ≥70% (hoặc đang trên đà đạt). 50+ bài tổng cộng. Biết rõ kênh phân phối nào hoạt động. Chuyên gia đang trong quá trình xác nhận nội dung.</span>
+    </div>
+  </div>
+
+  <!-- ── PHASE 3 ── -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num">3</div>
+      <div class="phase-meta">
+        <div class="phase-period">Tháng 10–11 · 8 tuần</div>
+        <div class="phase-title">Validate & Chuẩn bị năm 2</div>
+        <div class="phase-goal">Đích đến: 3 KR đều đạt + đủ data để quyết định monetize và scale năm 2</div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 10 — Tăng chiều sâu & Credibility</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.3</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Hoàn tất việc chuyên gia xác nhận ≥10 bài. Nếu đã có, thảo luận về việc họ đồng ý xuất hiện công khai trên website (Advisory Board page).</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2+</span></div>
+          <div class="task-owner to-loc">📚 Lộc</div>
+          <div class="task-text">Xây 1–2 "lộ trình học" (learning path) có cấu trúc rõ: "Dược lý cơ bản 4 tuần", "Tâm lý đại cương người mới". Đây là sản phẩm có thể charge phí đầu tiên — cần validate sức hút trước khi monetize.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">Tăng trưởng</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Launch email newsletter (Mailchimp/Brevo miễn phí). Mỗi tuần 1 email: tóm tắt 1 kiến thức quan trọng + 3 câu quiz nhanh. Mục tiêu: 50 subscribers đầu tiên cuối tháng 10.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">North Star</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Ghi nhận mobile traffic % — dữ liệu để quyết định có build Mobile App không (ngưỡng kích hoạt trong chiến lược: >50% liên tục 2 quý).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="month-block">
+      <div class="month-head">Tháng 11 — Final Retrospective & Kế hoạch năm 2</div>
+      <div class="tasks-grid">
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o1">KR 1.2</span></div>
+          <div class="task-owner to-both">🤝 Cả hai</div>
+          <div class="task-text">Khảo sát lần 2: 20 người dùng thật về willingness-to-pay. "Bạn sẵn sàng trả bao nhiêu/tháng để mở khóa [learning path / tính năng X]?" — Dữ liệu này định hình toàn bộ monetization năm 2.</div>
+        </div>
+        <div class="task-card">
+          <div class="task-tags"><span class="kr-tag kr-tag-o2">Kỹ thuật</span></div>
+          <div class="task-owner to-chuot">🛠 Chuột</div>
+          <div class="task-text">Technical audit: tính năng nào được dùng ít nhất? Bug nào tồn tại lâu nhất? Quyết định cần build thêm gì vs bỏ đi gì trước khi scale năm 2.</div>
+        </div>
+        <div class="task-card span2">
+          <div class="task-tags"><span class="kr-tag kr-tag-o3">Checkpoint cuối</span></div>
+          <div class="task-owner to-both">🤝 Cả hai</div>
+          <div class="task-text"><strong>Final Retrospective (2–3 tiếng):</strong> Chấm điểm 3 KR (0.0–1.0). Rút 3 bài học lớn nhất. Dựa trên dữ liệu willingness-to-pay + mobile traffic + return rate — quyết định 3 điều cụ thể cho năm 2: mô hình monetize, có build App không, và kênh tăng trưởng sẽ đầu tư.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="milestone m3">
+      <span class="m-icon">🏁</span>
+      <span><strong>Cột mốc Tháng 11:</strong> KR 1.1 ✓ KR 1.2 ✓ KR 1.3 ✓. Kế hoạch monetize năm 2 đã được viết ra và hai bạn đồng thuận. Retrospective đã hoàn thành.</span>
+    </div>
+  </div>
+
+</div><!-- end action page -->
+
+
+<!-- ══════════════════════════════════════
+     PAGE 4: TỔNG KẾT
+══════════════════════════════════════ -->
+<div class="page" id="page-summary">
+  <div class="eyebrow">Sau buổi brainstorm</div>
+  <h1>Tổng kết &<br><em>Bước tiếp theo</em></h1>
+  <div class="lead">Ghi lại các quyết định quan trọng nhất từ buổi thảo luận. Đây là tài liệu tham chiếu khi hai bạn bất đồng về sau.</div>
+
+  <hr>
+
+  <h2>Quyết định quan trọng nhất</h2>
+  <div class="summary-grid">
+    <div class="sum-box">
+      <div class="sum-label">3 quyết định sẽ định hình toàn bộ 6 tháng</div>
+      <textarea placeholder="1.&#10;2.&#10;3."></textarea>
+    </div>
+    <div class="sum-box">
+      <div class="sum-label">Điều chỉnh so với kế hoạch này</div>
+      <textarea placeholder="Thay đổi: ...&#10;Giữ nguyên: ...&#10;Cần tìm hiểu thêm: ..."></textarea>
+    </div>
+    <div class="sum-box">
+      <div class="sum-label">5 việc làm ngay trong tuần 1</div>
+      <textarea placeholder="Lộc:&#10;1.&#10;2.&#10;&#10;Chuột:&#10;1.&#10;2.&#10;&#10;Cả hai:&#10;1."></textarea>
+    </div>
+    <div class="sum-box">
+      <div class="sum-label">Câu hỏi chưa có đáp án, cần research thêm</div>
+      <textarea placeholder="Vấn đề cần tìm hiểu trước khi quyết định..."></textarea>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>Rủi ro cần theo dõi</h2>
+  <div class="risk-item">
+    <div class="risk-n">1</div>
+    <div><div class="risk-col-head">Rủi ro</div><div class="risk-prob">Lộc kiệt sức vì sản xuất song song 2 ngành, chất lượng giảm dần mà không ai nhận ra cho đến khi beta feedback tệ.</div></div>
+    <div><div class="risk-col-head">Phòng ngừa</div><div class="risk-sol">Hard limit 5 bài/tuần. Chất lượng là thương hiệu — 1 bài sai đắt hơn 10 bài không có.</div></div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-n">2</div>
+    <div><div class="risk-col-head">Rủi ro</div><div class="risk-prob">Chuột build quá nhiều tính năng, website chậm ra mắt, Lộc không biết viết cho giao diện nào.</div></div>
+    <div><div class="risk-col-head">Phòng ngừa</div><div class="risk-sol">Deadline cứng 31/7. MVP là danh sách tính năng tối thiểu đã được hai bạn thống nhất từ Q2.</div></div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-n">3</div>
+    <div><div class="risk-col-head">Rủi ro</div><div class="risk-prob">Beta users cho feedback lịch sự thay vì thật — KR 1.2 trông như đạt nhưng thực ra chưa validate.</div></div>
+    <div><div class="risk-col-head">Phòng ngừa</div><div class="risk-sol">Mời beta users từ groups sinh viên (người lạ) thay vì chỉ bạn bè thân. Câu hỏi khảo sát cụ thể, không phải "bạn thích không?"</div></div>
+  </div>
+  <div class="risk-item">
+    <div class="risk-n">4</div>
+    <div><div class="risk-col-head">Rủi ro</div><div class="risk-prob">Bất đồng về quyết định ở vùng giao thoa (UI của bài học, giọng văn social) gây mất thời gian và làm nản.</div></div>
+    <div><div class="risk-col-head">Phòng ngừa</div><div class="risk-sol">Bản đồ quyền quyết định (Q13) được viết rõ và lưu trong Notion từ tuần 1. Có cơ chế xử lý bất đồng đã thống nhất trước.</div></div>
+  </div>
+
+  <hr>
+
+  <button class="export-btn" onclick="exportAll()">↓ Xuất tóm tắt toàn bộ quyết định</button>
+
+</div>
+
+
+<script>
+// ── Navigation ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── Toggle Q cards ──
+function toggle(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── Resolve ──
+function resolve(id, e) {
+  e.stopPropagation();
+  document.getElementById(id).classList.toggle('resolved');
+  updateProgress();
+}
+
+// ── Progress ──
+function updateProgress() {
+  const all = document.querySelectorAll('.q-card[id]').length;
+  const done = document.querySelectorAll('.q-card[id].resolved').length;
+  const pct = all ? (done / all * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = done + '/' + all + ' quyết định';
+}
+
+// ── Auto-resize textareas ──
+document.querySelectorAll('textarea').forEach(ta => {
+  ta.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+  });
+});
+
+// ── Export ──
+function exportAll() {
+  const qLabels = {
+    q1:'Q1 · Ra mắt song song 2 ngành', q2:'Q2 · MVP website', q3:'Q3 · Quy trình duyệt bài',
+    q4:'Q4 · Cam kết thời gian Lộc', q5:'Q5 · Stack kỹ thuật', q6:'Q6 · AI Loop Feedback',
+    q7:'Q7 · Hệ thống tracking', q8:'Q8 · Beta users', q9:'Q9 · Advisory Board',
+    q10:'Q10 · Kênh tăng trưởng', q11:'Q11 · Ngân sách', q12:'Q12 · Ngưỡng pivot',
+    q13:'Q13 · Phân chia quyền', q14:'Q14 · Nhịp làm việc', q15:'Q15 · Equity'
+  };
+  let out = '══ BẠN CÙNG HỌC — TÓM TẮT QUYẾT ĐỊNH BRAINSTORM ══\n\n';
+  out += '[ OKR ]\nObjective: Xây được sản phẩm mà người học muốn dùng thật sự\n';
+  out += 'KR 1.1: Website live ≥30 bài trước 31/7\n';
+  out += 'KR 1.2: ≥70% beta feedback tốt\n';
+  out += 'KR 1.3: ≥1 chuyên gia xác nhận ≥10 bài\n\n';
+  out += '[ CÁC QUYẾT ĐỊNH ]\n\n';
+  for (const [id, label] of Object.entries(qLabels)) {
+    const card = document.getElementById(id);
+    const ta = card ? card.querySelector('textarea') : null;
+    const resolved = card ? card.classList.contains('resolved') : false;
+    out += `[${resolved ? '✓ ĐÃ CHỐT' : '○ CHƯA CHỐT'}] ${label}\n`;
+    if (ta && ta.value.trim()) out += ta.value.trim() + '\n';
+    out += '\n';
+  }
+  out += '[ TỔNG KẾT ]\n\n';
+  document.querySelectorAll('.sum-box textarea').forEach((ta, i) => {
+    const labels = ['3 quyết định quan trọng nhất','Điều chỉnh kế hoạch','5 việc tuần 1','Câu hỏi cần research'];
+    if (ta.value.trim()) out += labels[i] + ':\n' + ta.value.trim() + '\n\n';
+  });
+  const blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ban-cung-hoc-brainstorm-decisions.txt';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+updateProgress();
+</script>
+</body>
+</html>

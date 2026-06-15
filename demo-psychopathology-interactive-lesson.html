@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bạn Cùng Học — Bài học tương tác (Demo): Chẩn đoán & Phân loại trong Bệnh học Tâm lý</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#f7f4ef; --ink:#1a1814; --surface:#fff; --surface2:#f0ece4; --border:#ddd8cc; --border2:#c8c0b0;
+ --muted:#9a9080; --muted2:#6a6050;
+ --green:#1e4d38; --green-bg:#eaf4ee; --green-mid:#2d7a58; --green-border:#aed4c0; --green-text:#143628;
+ --blue:#2a3f72; --blue-bg:#edf0f9; --blue-mid:#3d5fba; --blue-border:#b0c0e4; --blue-text:#1a2848;
+ --purple:#5c2d70; --purple-bg:#f4eefa; --purple-mid:#8a4ab0; --purple-border:#d0b0e4; --purple-text:#3a1a48;
+ --gold:#c07818; --gold-bg:#fdf5e4; --gold-border:#e8d090; --red:#b83c20; --red-bg:#fdf0ea;
+ --r:10px; --sh:0 2px 12px rgba(26,24,20,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;font-size:16px}
+h1,h2,h3,h4{font-family:'Lora',serif;font-weight:600;line-height:1.25}
+.mono{font-family:'DM Mono',monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* Top bar */
+.topbar{background:var(--blue);color:#fff;position:sticky;top:0;z-index:40}
+.topbar .wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
+.brand{font-family:'Lora',serif;font-weight:600;font-size:18px;display:flex;align-items:center;gap:8px}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.topbar .meta{font-size:13px;opacity:.85}
+
+/* Progress rail */
+.rail{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:49px;z-index:30}
+.rail .wrap{display:flex;gap:6px;padding:10px 20px;overflow-x:auto}
+.step{flex:1;min-width:120px;border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;cursor:pointer;background:var(--surface);transition:.15s;font-size:13px}
+.step:hover{border-color:var(--blue-border)}
+.step.active{background:var(--blue-bg);border-color:var(--blue-mid)}
+.step.done{background:var(--green-bg);border-color:var(--green-border)}
+.step .lv{display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted2);font-weight:600}
+.step .nm{font-weight:600;color:var(--ink)}
+.step.done .nm::after{content:" ✓";color:var(--green-mid)}
+
+.layout{display:grid;grid-template-columns:1fr 300px;gap:28px;padding:28px 0 80px}
+@media(max-width:880px){.layout{grid-template-columns:1fr}.side{order:-1}}
+
+/* Beat cards */
+.beat{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:26px 28px;margin-bottom:20px;animation:fade .25s}
+.beat.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bloom-tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:99px;margin-bottom:10px}
+.bt-rem{background:#eef1f5;color:#4a5568}.bt-und{background:var(--blue-bg);color:var(--blue-text)}
+.bt-app{background:var(--green-bg);color:var(--green-text)}.bt-ana{background:var(--gold-bg);color:#8a5410}
+.bt-eva{background:var(--purple-bg);color:var(--purple-text)}.bt-cre{background:#f3e8ff;color:#6b21a8}
+.beat h2{font-size:24px;margin-bottom:4px}
+.objective{font-size:14px;color:var(--muted2);font-style:italic;margin-bottom:18px;border-left:3px solid var(--blue-border);padding-left:12px}
+.beat p{margin-bottom:12px}
+.beat h3{font-size:18px;margin:18px 0 8px}
+
+/* Flashcards (Remember) */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:14px 0}
+.fc{perspective:800px;height:120px;cursor:pointer}
+.fc-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .fc-inner{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-weight:600}
+.fc-front{background:var(--blue-bg);color:var(--blue-text)}
+.fc-back{background:var(--surface2);color:var(--ink);transform:rotateY(180deg);font-weight:400;font-size:14px}
+
+/* Comparison (Understand) */
+.cmp{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}
+.cmp th,.cmp td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+.cmp th{background:var(--blue-bg);font-family:'Lora',serif}
+
+/* Quiz / vignette */
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:var(--r);padding:12px 14px;margin:8px 0;cursor:pointer;font:inherit;transition:.12s}
+.opt:hover{border-color:var(--blue-mid);background:var(--blue-bg)}
+.opt.correct{background:var(--green-bg);border-color:var(--green-mid)}
+.opt.wrong{background:var(--red-bg);border-color:var(--red)}
+.opt:disabled{cursor:default}
+.explain{background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:var(--r);padding:12px 14px;margin-top:10px;font-size:14px;display:none}
+.explain.show{display:block}
+.vignette{background:var(--surface2);border-left:4px solid var(--blue-mid);border-radius:6px;padding:14px 16px;margin:14px 0;font-size:15px}
+.check{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border)}
+.check input{margin-top:5px;width:18px;height:18px;accent-color:var(--green-mid)}
+
+/* Analyze sorting */
+.sortrow{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin:8px 0;background:var(--surface)}
+.sortrow .lbl{flex:1}
+.pill-btn{border:1px solid var(--border2);background:var(--surface);border-radius:99px;padding:4px 12px;cursor:pointer;font:inherit;font-size:13px}
+.pill-btn.sel{background:var(--blue-mid);color:#fff;border-color:var(--blue-mid)}
+
+/* Evaluate poll */
+.poll button{display:block;width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);border-radius:var(--r);padding:12px 14px;margin:8px 0;cursor:pointer;font:inherit}
+.bar{height:10px;border-radius:99px;background:var(--blue-mid);margin-top:6px;transition:width .5s}
+
+/* Create */
+textarea{width:100%;min-height:120px;border:1px solid var(--border);border-radius:var(--r);padding:12px;font:inherit;resize:vertical}
+.rubric{font-size:14px;margin-top:12px}
+.rubric label{display:flex;gap:8px;padding:6px 0;align-items:flex-start}
+.rubric input{margin-top:5px;accent-color:var(--green-mid)}
+
+/* Essence */
+.essence{background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:14px 16px;margin:16px 0;position:relative}
+.essence .lab{font-size:12px;font-weight:700;color:var(--green-text);text-transform:uppercase;letter-spacing:.05em}
+.save-ess{position:absolute;top:12px;right:12px;border:1px solid var(--green-mid);background:var(--surface);color:var(--green-text);border-radius:99px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
+.save-ess.saved{background:var(--green-mid);color:#fff}
+
+/* buttons */
+.btn{border:none;border-radius:var(--r);padding:11px 20px;font:inherit;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--blue-mid);color:#fff}
+.btn-ghost{background:var(--surface);border:1px solid var(--border2);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.beat-foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.gate-note{font-size:13px;color:var(--muted2)}
+
+/* Sidebar */
+.side .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin-bottom:16px;position:sticky;top:120px}
+.side h4{font-size:15px;margin-bottom:10px}
+.prog-ring{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.prog-num{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--blue-mid)}
+.mini{font-size:13px;color:var(--muted2)}
+.barwrap{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:10px 0}
+.barwrap > div{height:100%;background:var(--green-mid);width:0;transition:width .4s}
+.qa-list{font-size:13px;list-style:none}
+.qa-list li{padding:5px 0;display:flex;justify-content:space-between;border-bottom:1px dashed var(--border)}
+.qa-list .ok{color:var(--green-mid);font-weight:600}
+.qa-list .no{color:var(--muted)}
+
+/* Notebook FAB + drawer */
+.fab{position:fixed;bottom:22px;right:22px;background:var(--blue-mid);color:#fff;border:none;border-radius:99px;padding:14px 20px;font:inherit;font-weight:600;cursor:pointer;box-shadow:var(--sh);z-index:50}
+.drawer{position:fixed;top:0;right:0;height:100%;width:360px;max-width:90vw;background:var(--surface);box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:.3s;z-index:60;padding:22px;overflow-y:auto}
+.drawer.open{transform:none}
+.drawer h3{margin-bottom:14px}
+.drawer .ess-item{background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;font-size:14px}
+.drawer .close{float:right;border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted2)}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55;display:none}
+.scrim.show{display:block}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;opacity:0;transition:.3s;z-index:70}
+.toast.show{opacity:1}
+.demo-badge{background:var(--gold-bg);border:1px solid var(--gold-border);color:#8a5410;font-size:12px;padding:2px 10px;border-radius:99px;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <div class="brand"><span class="dot"></span> Bạn Cùng Học <span class="demo-badge">DEMO tương tác</span></div>
+  <div class="meta">Tâm lý học · Bệnh học Tâm lý · Năm 2</div>
+</div></div>
+
+<!-- Bloom progress rail -->
+<div class="rail"><div class="wrap" id="rail"></div></div>
+
+<div class="wrap layout">
+ <main id="beats">
+
+  <!-- BEAT 1 — REMEMBER -->
+  <section class="beat show" data-i="0">
+    <span class="bloom-tag bt-rem">Nhớ · Remember</span>
+    <h2>Khởi động: Thuật ngữ nền tảng</h2>
+    <div class="objective">Mục tiêu: Định nghĩa được chẩn đoán, phân loại, độ tin cậy (reliability), độ giá trị (validity) và đồng mắc (comorbidity).</div>
+    <p>Lật từng thẻ để ôn lại định nghĩa. Hệ thống ghi nhận thẻ bạn đã xem.</p>
+    <div class="cards" id="cards"></div>
+    <div class="beat-foot">
+      <span class="gate-note" id="g0">Lật ít nhất 4/5 thẻ để mở bước tiếp theo.</span>
+      <button class="btn btn-primary" data-next disabled>Tiếp tục →</button>
+    </div>
+  </section>
+
+  <!-- BEAT 2 — UNDERSTAND -->
+  <section class="beat" data-i="1">
+    <span class="bloom-tag bt-und">Hiểu · Understand</span>
+    <h2>Hai hệ thống phân loại lớn</h2>
+    <div class="objective">Mục tiêu: Giải thích cấu trúc của DSM-5-TR và ICD-11; mô tả khác biệt giữa cách tiếp cận phân loại (categorical) và chiều kích (dimensional).</div>
+    <p>DSM-5-TR (Hội Tâm thần học Hoa Kỳ) và ICD-11 (WHO) là hai hệ thống chuẩn để mô tả và mã hóa rối loạn tâm thần. Cả hai phần lớn theo cách <b>categorical</b> — có/không có rối loạn — trong khi các mô hình <b>dimensional</b> xem triệu chứng nằm trên một thang liên tục.</p>
+    <table class="cmp">
+      <tr><th>Tiêu chí</th><th>DSM-5-TR</th><th>ICD-11</th></tr>
+      <tr><td>Cơ quan</td><td>APA (Hoa Kỳ)</td><td>WHO (toàn cầu)</td></tr>
+      <tr><td>Mục đích chính</td><td>Chẩn đoán lâm sàng & nghiên cứu</td><td>Thống kê y tế & mã hóa toàn cầu</td></tr>
+      <tr><td>Cách tiếp cận</td><td>Chủ yếu categorical, có yếu tố dimensional</td><td>Categorical + hướng dẫn mô tả linh hoạt</td></tr>
+      <tr><td>Truy cập</td><td>Trả phí</td><td>Miễn phí, online</td></tr>
+    </table>
+    <div class="essence" data-ess="e1">
+      <span class="lab">💡 Tinh hoa</span>
+      <button class="save-ess">Lưu vào sổ tay</button>
+      <p style="margin-top:8px;margin-bottom:0"><b>Categorical</b> hỏi "có hay không có rối loạn"; <b>dimensional</b> hỏi "ở mức độ nào". DSM/ICD chủ yếu categorical nhưng đang dần tích hợp chiều kích.</p>
+    </div>
+    <div class="beat-foot">
+      <button class="btn btn-ghost" data-prev>← Quay lại</button>
+      <button class="btn btn-primary" data-next>Tiếp tục →</button>
+    </div>
+  </section>
+
+  <!-- BEAT 3 — APPLY -->
+  <section class="beat" data-i="2">
+    <span class="bloom-tag bt-app">Vận dụng · Apply</span>
+    <h2>Ca lâm sàng: gán chẩn đoán sơ bộ</h2>
+    <div class="objective">Mục tiêu: Dùng tiêu chuẩn DSM-5-TR để gán chẩn đoán sơ bộ cho một ca và lý giải từng tiêu chí.</div>
+    <div class="vignette">
+      <b>Ca:</b> Minh, 21 tuổi, sinh viên. Suốt hơn 3 tuần qua: khí sắc trầm gần như cả ngày, mất hứng thú với mọi hoạt động từng yêu thích, mất ngủ, mệt mỏi, khó tập trung khi học, và cảm giác bản thân vô dụng. Không có giai đoạn khí sắc tăng cao trước đây.
+    </div>
+    <p><b>Dựa trên mô tả, chẩn đoán sơ bộ phù hợp nhất là?</b></p>
+    <div id="q-apply"></div>
+    <h3>Bạn đã khớp đúng mấy tiêu chí?</h3>
+    <p class="mini">Tích các tiêu chí xuất hiện trong ca (cần ≥5 triệu chứng kéo dài ≥2 tuần cho Giai đoạn trầm cảm chủ yếu).</p>
+    <div id="criteria"></div>
+    <div class="beat-foot">
+      <button class="btn btn-ghost" data-prev>← Quay lại</button>
+      <span class="gate-note" id="g2">Trả lời câu hỏi để tiếp tục.</span>
+      <button class="btn btn-primary" data-next disabled>Tiếp tục →</button>
+    </div>
+  </section>
+
+  <!-- BEAT 4 — ANALYZE -->
+  <section class="beat" data-i="3">
+    <span class="bloom-tag bt-ana">Phân tích · Analyze</span>
+    <h2>Categorical hay Dimensional?</h2>
+    <div class="objective">Mục tiêu: So sánh ưu/nhược điểm của phân loại categorical và dimensional; nhận diện nguồn gây thiếu nhất quán trong chẩn đoán.</div>
+    <p>Xếp mỗi phát biểu vào cách tiếp cận mà nó <b>là ưu điểm</b>:</p>
+    <div id="sort"></div>
+    <div class="beat-foot">
+      <button class="btn btn-ghost" data-prev>← Quay lại</button>
+      <span class="gate-note" id="g3">Xếp đúng cả 4 để tiếp tục.</span>
+      <button class="btn btn-primary" data-next disabled>Tiếp tục →</button>
+    </div>
+  </section>
+
+  <!-- BEAT 5 — EVALUATE -->
+  <section class="beat" data-i="4">
+    <span class="bloom-tag bt-eva">Đánh giá · Evaluate</span>
+    <h2>Đạo đức của việc dán nhãn chẩn đoán</h2>
+    <div class="objective">Mục tiêu: Phê phán hệ quả đạo đức của nhãn chẩn đoán (kỳ thị, lời tiên tri tự ứng nghiệm, thiên lệch văn hóa).</div>
+    <p>Nghiên cứu kinh điển của <b>Rosenhan (1973)</b> — "On being sane in insane places" — cho thấy một khi đã bị dán nhãn, hành vi bình thường vẫn bị diễn giải qua lăng kính chẩn đoán. Bạn nghiêng về phía nào?</p>
+    <div class="poll" id="poll"></div>
+    <div class="essence" data-ess="e2">
+      <span class="lab">💡 Tinh hoa</span>
+      <button class="save-ess">Lưu vào sổ tay</button>
+      <p style="margin-top:8px;margin-bottom:0">Nhãn chẩn đoán giúp giao tiếp & điều trị, nhưng có thể gây kỳ thị và "dính" vào người bệnh. Một chẩn đoán tốt phải cân bằng tiện ích lâm sàng với rủi ro đạo đức.</p>
+    </div>
+    <div class="beat-foot">
+      <button class="btn btn-ghost" data-prev>← Quay lại</button>
+      <span class="gate-note" id="g4">Chọn một quan điểm để tiếp tục.</span>
+      <button class="btn btn-primary" data-next disabled>Tiếp tục →</button>
+    </div>
+  </section>
+
+  <!-- BEAT 6 — CREATE -->
+  <section class="beat" data-i="5">
+    <span class="bloom-tag bt-cre">Sáng tạo · Create</span>
+    <h2>Bài tập: Phác thảo formulation sinh-tâm-xã hội</h2>
+    <div class="objective">Mục tiêu: Đề xuất một case formulation ngắn tích hợp chẩn đoán sơ bộ với bối cảnh sinh học – tâm lý – xã hội.</div>
+    <p>Viết 4–6 câu cho ca của Minh, chạm tới cả ba yếu tố. Sau đó tự đối chiếu với rubric.</p>
+    <textarea id="formText" placeholder="Sinh học: ... Tâm lý: ... Xã hội: ... Chẩn đoán sơ bộ & bước tiếp theo: ..."></textarea>
+    <div class="rubric" id="rubric"></div>
+    <div class="beat-foot">
+      <button class="btn btn-ghost" data-prev>← Quay lại</button>
+      <button class="btn btn-primary" id="finish" disabled>Hoàn thành bài học</button>
+    </div>
+  </section>
+
+  <!-- COMPLETE -->
+  <section class="beat" data-i="6">
+    <span class="bloom-tag bt-cre">Hoàn thành</span>
+    <h2>🎉 Bạn đã hoàn thành bài học</h2>
+    <p>Bạn đã đi qua cả 6 bậc tư duy của Bloom — từ <b>nhớ</b> thuật ngữ đến <b>sáng tạo</b> một formulation. Đây là cách mỗi bài học của BCH đảm bảo chiều sâu, không chỉ "đọc qua".</p>
+    <div class="essence"><span class="lab">Bước tiếp theo</span><p style="margin-top:8px;margin-bottom:0">Bài học này sẽ được nhắc ôn lại theo chu kỳ lặp lại ngắt quãng (spaced repetition). Hoàn thành bài kiểm tra cuối khóa (≥80%) để nhận chứng chỉ.</p></div>
+    <div class="beat-foot"><button class="btn btn-ghost" data-prev>← Quay lại</button><button class="btn btn-primary" onclick="openDrawer()">Mở sổ tay của tôi</button></div>
+  </section>
+
+ </main>
+
+ <!-- Sidebar: progress + live QA -->
+ <aside class="side">
+  <div class="card">
+    <h4>📊 Tiến độ bài học</h4>
+    <div class="prog-ring"><span class="prog-num" id="pct">0%</span><span class="mini">qua các bậc Bloom</span></div>
+    <div class="barwrap"><div id="progbar"></div></div>
+    <h4 style="margin-top:18px">✅ Bao phủ Bloom (đảm bảo chất lượng)</h4>
+    <ul class="qa-list" id="qa"></ul>
+    <p class="mini" style="margin-top:10px">Bài học chỉ được tính "đạt chuẩn" khi cả 6 bậc được hoàn thành — đây là cơ chế QA tự động của BCH.</p>
+  </div>
+ </aside>
+</div>
+
+<!-- ================= INTERACTION TYPE GALLERY ================= -->
+<div class="wrap" style="padding-bottom:60px">
+  <div style="background:var(--blue);color:#fff;border-radius:var(--r);padding:18px 22px;margin-bottom:18px">
+    <h2 style="color:#fff;font-size:22px;margin-bottom:4px">🧩 Thư viện kiểu tương tác (Interaction Gallery)</h2>
+    <p style="margin:0;opacity:.9;font-size:14px">Các kiểu tương tác bổ sung — minh họa cho catalog trong bản blueprint. Mỗi kiểu gắn với một bậc Bloom và một mức chi phí.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px">
+
+    <!-- Matching -->
+    <div class="beat show" data-i="g1" style="margin:0">
+      <span class="bloom-tag bt-und">Hiểu · Matching pairs</span>
+      <h2 style="font-size:19px">Ghép cặp: thuốc ↔ nhóm</h2>
+      <p class="mini">Bấm một mục bên trái, rồi mục tương ứng bên phải.</p>
+      <div id="match" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+      <p class="mini" id="matchMsg" style="margin-top:8px"></p>
+    </div>
+
+    <!-- Ordering -->
+    <div class="beat show" data-i="g2" style="margin:0">
+      <span class="bloom-tag bt-app">Vận dụng · Ordering</span>
+      <h2 style="font-size:19px">Xếp đúng thứ tự: quy trình chẩn đoán</h2>
+      <p class="mini">Dùng nút ▲ ▼ để sắp xếp, rồi kiểm tra.</p>
+      <div id="order"></div>
+      <button class="btn btn-primary" id="orderCheck" style="margin-top:10px">Kiểm tra thứ tự</button>
+      <p class="mini" id="orderMsg" style="margin-top:8px"></p>
+    </div>
+
+    <!-- Slider -->
+    <div class="beat show" data-i="g3" style="margin:0">
+      <span class="bloom-tag bt-ana">Phân tích · Dimensional slider</span>
+      <h2 style="font-size:19px">Ước lượng mức độ nặng (PHQ-9)</h2>
+      <p>Ca mô tả trầm cảm mức độ vừa–nặng. Kéo thanh tới vùng bạn cho là đúng (10–19 = vừa).</p>
+      <input type="range" min="0" max="27" value="5" id="slider" style="width:100%;accent-color:var(--blue-mid)">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted2)"><span>0 nhẹ</span><span>13</span><span>27 rất nặng</span></div>
+      <p class="mono" style="font-size:22px;margin:6px 0">Điểm: <span id="sval">5</span></p>
+      <p class="mini" id="sliderMsg"></p>
+    </div>
+
+    <!-- Cloze -->
+    <div class="beat show" data-i="g4" style="margin:0">
+      <span class="bloom-tag bt-und">Hiểu · Cloze fill-blank</span>
+      <h2 style="font-size:19px">Điền vào chỗ trống</h2>
+      <p>Độ <input id="cloze" style="width:130px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font:inherit" placeholder="…"> đo mức độ nhất quán giữa các lâm sàng viên.</p>
+      <button class="btn btn-primary" id="clozeCheck">Kiểm tra</button>
+      <p class="mini" id="clozeMsg" style="margin-top:8px"></p>
+    </div>
+
+    <!-- Confidence MCQ -->
+    <div class="beat show" data-i="g5" style="margin:0">
+      <span class="bloom-tag bt-eva">Siêu nhận thức · Confidence-weighted</span>
+      <h2 style="font-size:19px">Trả lời + mức độ tự tin</h2>
+      <p>ICD-11 do tổ chức nào ban hành?</p>
+      <div id="confQ"></div>
+      <p class="mini" style="margin-top:8px">Mức tự tin:</p>
+      <div id="confLvl" style="display:flex;gap:8px"></div>
+      <button class="btn btn-primary" id="confSubmit" style="margin-top:10px" disabled>Gửi</button>
+      <p class="mini" id="confMsg" style="margin-top:8px"></p>
+    </div>
+
+    <!-- Hotspot (SVG) -->
+    <div class="beat show" data-i="g6" style="margin:0">
+      <span class="bloom-tag bt-rem">Nhớ · Labeled diagram / Hotspot</span>
+      <h2 style="font-size:19px">Bấm đúng vùng: thùy trán</h2>
+      <p class="mini">Bấm vào vùng não phụ trách điều hành & ra quyết định.</p>
+      <svg viewBox="0 0 200 150" style="width:100%;max-width:280px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2)">
+        <ellipse cx="100" cy="80" rx="80" ry="55" fill="#e8e0d2" stroke="#c8c0b0"/>
+        <path id="hs-front" d="M40,55 Q55,30 95,38 L95,90 Q60,92 42,80 Z" fill="#cdddf2" stroke="#3d5fba" style="cursor:pointer"/>
+        <path id="hs-occ" d="M150,60 Q175,75 150,100 Q130,95 128,80 Z" fill="#e0d8ca" stroke="#c8c0b0" style="cursor:pointer"/>
+        <path id="hs-temp" d="M70,95 Q100,120 135,100 Q120,118 90,118 Z" fill="#e0d8ca" stroke="#c8c0b0" style="cursor:pointer"/>
+        <text x="100" y="145" text-anchor="middle" font-size="9" fill="#6a6050">Sơ đồ minh họa</text>
+      </svg>
+      <p class="mini" id="hsMsg" style="margin-top:8px"></p>
+    </div>
+
+  </div>
+</div>
+
+<button class="fab" onclick="openDrawer()">📋 Sổ tay (<span id="essCount">0</span>)</button>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <button class="close" onclick="closeDrawer()">×</button>
+  <h3>📋 Sổ tay của tôi</h3>
+  <div id="essList"><p class="mini">Chưa có tinh hoa nào được lưu. Bấm "Lưu vào sổ tay" ở các block 💡.</p></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const BLOOM=[
+ {k:'Nhớ',c:'bt-rem'},{k:'Hiểu',c:'bt-und'},{k:'Vận dụng',c:'bt-app'},
+ {k:'Phân tích',c:'bt-ana'},{k:'Đánh giá',c:'bt-eva'},{k:'Sáng tạo',c:'bt-cre'}
+];
+let cur=0; const done=new Set(); const saved=new Map();
+
+// build rail
+const rail=document.getElementById('rail'), qa=document.getElementById('qa');
+BLOOM.forEach((b,i)=>{
+ const d=document.createElement('div'); d.className='step'; d.dataset.s=i;
+ d.innerHTML=`<span class="lv">${i+1}. ${b.k}</span><span class="nm">Bậc ${i+1}</span>`;
+ d.onclick=()=>{ if(i<=maxReached) goBeat(i); };
+ rail.appendChild(d);
+ const li=document.createElement('li'); li.innerHTML=`<span>${i+1}. ${b.k}</span><span class="no" id="qa${i}">○ chưa đạt</span>`;
+ qa.appendChild(li);
+});
+let maxReached=0;
+
+function goBeat(i){
+ cur=i;
+ document.querySelectorAll('.beat').forEach(b=>b.classList.toggle('show', +b.dataset.i===i));
+ document.querySelectorAll('.step').forEach(s=>{const n=+s.dataset.s;s.classList.toggle('active',n===i);s.classList.toggle('done',done.has(n));});
+ window.scrollTo({top:0,behavior:'smooth'});
+ updateProg();
+}
+function complete(i){ done.add(i); if(i+1>maxReached)maxReached=i+1;
+ const el=document.getElementById('qa'+i); if(el){el.textContent='● đạt';el.className='ok';}
+ updateProg();
+}
+function updateProg(){
+ const p=Math.round(done.size/6*100);
+ document.getElementById('pct').textContent=p+'%';
+ document.getElementById('progbar').style.width=p+'%';
+ document.querySelectorAll('.step').forEach(s=>s.classList.toggle('done',done.has(+s.dataset.s)));
+}
+// nav buttons
+document.querySelectorAll('[data-next]').forEach(b=>b.onclick=()=>{complete(cur);goBeat(cur+1);});
+document.querySelectorAll('[data-prev]').forEach(b=>b.onclick=()=>goBeat(cur-1));
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ---- Beat 1: flashcards ---- */
+const TERMS=[
+ ['Chẩn đoán','Quá trình xác định rối loạn dựa trên triệu chứng và tiêu chuẩn.'],
+ ['Phân loại','Hệ thống tổ chức các rối loạn thành nhóm có tiêu chí rõ ràng.'],
+ ['Độ tin cậy','Mức độ nhất quán: nhiều lâm sàng viên cho cùng kết luận.'],
+ ['Độ giá trị','Mức độ chẩn đoán thật sự đo đúng cái cần đo.'],
+ ['Đồng mắc','Sự hiện diện đồng thời của ≥2 rối loạn ở một người.']
+];
+const flipped=new Set();
+const cw=document.getElementById('cards');
+TERMS.forEach(([t,d],i)=>{
+ const c=document.createElement('div');c.className='fc';
+ c.innerHTML=`<div class="fc-inner"><div class="fc-face fc-front">${t}</div><div class="fc-face fc-back">${d}</div></div>`;
+ c.onclick=()=>{c.classList.toggle('flip');flipped.add(i);
+   if(flipped.size>=4){document.querySelector('[data-i="0"] [data-next]').disabled=false;
+     document.getElementById('g0').textContent='Đã đủ điều kiện ✓';}
+ };
+ cw.appendChild(c);
+});
+
+/* ---- Beat 3: apply quiz + criteria ---- */
+const applyOpts=[
+ ['Rối loạn lưỡng cực I',false,'Cần ít nhất một giai đoạn hưng cảm — ca không mô tả khí sắc tăng cao.'],
+ ['Giai đoạn trầm cảm chủ yếu (MDD)',true,'Đúng: ≥5 triệu chứng (khí sắc trầm, mất hứng thú, mất ngủ, mệt, kém tập trung, cảm giác vô dụng) kéo dài >2 tuần.'],
+ ['Rối loạn lo âu lan tỏa',false,'Triệu chứng cốt lõi ở đây là khí sắc trầm và mất hứng thú, không phải lo âu mạn tính.'],
+ ['Tâm thần phân liệt',false,'Không có hoang tưởng, ảo giác hay rối loạn tư duy được mô tả.']
+];
+const qa3=document.getElementById('q-apply');
+applyOpts.forEach((o,i)=>{
+ const b=document.createElement('button');b.className='opt';b.textContent=o[0];
+ b.onclick=()=>{
+   document.querySelectorAll('#q-apply .opt').forEach(x=>x.disabled=true);
+   b.classList.add(o[1]?'correct':'wrong');
+   if(!o[1]) document.querySelector(`#q-apply .opt:nth-child(2)`).classList.add('correct');
+   let ex=document.getElementById('ex3'); if(!ex){ex=document.createElement('div');ex.id='ex3';ex.className='explain show';qa3.after(ex);}
+   ex.innerHTML='<b>Giải thích:</b> '+o[2];
+   document.querySelector('[data-i="2"] [data-next]').disabled=false;
+   document.getElementById('g2').textContent='Đã trả lời ✓';
+ };
+ qa3.appendChild(b);
+});
+const CRIT=[
+ ['Khí sắc trầm gần như cả ngày',true],['Mất hứng thú/niềm vui',true],
+ ['Mất ngủ',true],['Mệt mỏi/mất năng lượng',true],
+ ['Khó tập trung',true],['Cảm giác vô dụng',true],
+ ['Giai đoạn hưng cảm trước đây',false]
+];
+const cb=document.getElementById('criteria');
+CRIT.forEach(([t,ok],i)=>{
+ const d=document.createElement('label');d.className='check';
+ d.innerHTML=`<input type="checkbox"><span>${t}</span>`;
+ cb.appendChild(d);
+});
+
+/* ---- Beat 4: sort categorical/dimensional ---- */
+const STATEMENTS=[
+ ['Dễ giao tiếp, ra quyết định điều trị nhanh','cat'],
+ ['Mã hóa thuận tiện cho thống kê & bảo hiểm','cat'],
+ ['Nắm bắt được mức độ nặng/nhẹ liên tục','dim'],
+ ['Giảm vấn đề ranh giới tùy tiện giữa "có/không"','dim']
+];
+const sortBox=document.getElementById('sort');
+const picks={};
+STATEMENTS.forEach((s,i)=>{
+ const r=document.createElement('div');r.className='sortrow';
+ r.innerHTML=`<span class="lbl">${s[0]}</span>
+   <button class="pill-btn" data-v="cat">Categorical</button>
+   <button class="pill-btn" data-v="dim">Dimensional</button>`;
+ r.querySelectorAll('.pill-btn').forEach(btn=>btn.onclick=()=>{
+   r.querySelectorAll('.pill-btn').forEach(x=>x.classList.remove('sel'));
+   btn.classList.add('sel'); picks[i]=btn.dataset.v; checkSort();
+ });
+ sortBox.appendChild(r);
+});
+function checkSort(){
+ const allRight=STATEMENTS.every((s,i)=>picks[i]===s[1]);
+ if(Object.keys(picks).length===4){
+   document.querySelectorAll('#sort .sortrow').forEach((r,i)=>{
+     r.style.borderColor=picks[i]===STATEMENTS[i][1]?'var(--green-mid)':'var(--red)';
+   });
+ }
+ if(allRight){document.querySelector('[data-i="3"] [data-next]').disabled=false;
+   document.getElementById('g3').textContent='Chính xác cả 4 ✓';}
+}
+
+/* ---- Beat 5: poll ---- */
+const POLL=[
+ ['Lợi ích lâm sàng quan trọng hơn — nhãn giúp điều trị & nghiên cứu',58],
+ ['Rủi ro kỳ thị lớn hơn — cần thận trọng khi dán nhãn',31],
+ ['Tùy bối cảnh — cần hệ thống minh bạch & xét văn hóa',11]
+];
+const pollBox=document.getElementById('poll');
+POLL.forEach((p,i)=>{
+ const b=document.createElement('button');b.innerHTML=p[0];
+ b.onclick=()=>{
+   document.querySelectorAll('#poll button').forEach(x=>x.disabled=true);
+   POLL.forEach((q,j)=>{
+     const el=document.querySelectorAll('#poll button')[j];
+     el.innerHTML=q[0]+`<div class="bar" style="width:0"></div><span class="mini">${q[1]}% bạn học chọn</span>`;
+     setTimeout(()=>el.querySelector('.bar').style.width=q[1]+'%',60);
+   });
+   document.querySelector('[data-i="4"] [data-next]').disabled=false;
+   document.getElementById('g4').textContent='Đã ghi nhận quan điểm ✓';
+ };
+ pollBox.appendChild(b);
+});
+
+/* ---- Beat 6: create + rubric ---- */
+const RUBRIC=['Đề cập yếu tố sinh học','Đề cập yếu tố tâm lý','Đề cập yếu tố xã hội','Nêu chẩn đoán sơ bộ & bước tiếp theo'];
+const rb=document.getElementById('rubric');
+RUBRIC.forEach((t,i)=>{
+ const l=document.createElement('label');
+ l.innerHTML=`<input type="checkbox"><span>${t}</span>`;
+ l.querySelector('input').onchange=checkRubric;
+ rb.appendChild(l);
+});
+document.getElementById('formText').addEventListener('input',checkRubric);
+function checkRubric(){
+ const checks=[...rb.querySelectorAll('input')].filter(x=>x.checked).length;
+ const words=document.getElementById('formText').value.trim().split(/\s+/).filter(Boolean).length;
+ document.getElementById('finish').disabled=!(checks>=3 && words>=20);
+}
+document.getElementById('finish').onclick=()=>{complete(5);goBeat(6);toast('Hoàn thành! Bài học đã đạt chuẩn QA.');};
+
+/* ---- essences ---- */
+document.querySelectorAll('.save-ess').forEach(btn=>{
+ btn.onclick=()=>{
+   const wrap=btn.closest('[data-ess]'); const id=wrap.dataset.ess;
+   const text=wrap.querySelector('p').textContent;
+   if(saved.has(id)){saved.delete(id);btn.classList.remove('saved');btn.textContent='Lưu vào sổ tay';toast('Đã gỡ khỏi sổ tay');}
+   else{saved.set(id,text);btn.classList.add('saved');btn.textContent='✓ Đã lưu';toast('Đã lưu vào sổ tay');}
+   renderEss();
+ };
+});
+function renderEss(){
+ document.getElementById('essCount').textContent=saved.size;
+ const box=document.getElementById('essList');
+ if(saved.size===0){box.innerHTML='<p class="mini">Chưa có tinh hoa nào được lưu.</p>';return;}
+ box.innerHTML='';
+ saved.forEach(t=>{const d=document.createElement('div');d.className='ess-item';d.textContent=t;box.appendChild(d);});
+}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('scrim').classList.add('show');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('scrim').classList.remove('show');}
+
+goBeat(0);
+
+/* ================= INTERACTION GALLERY ================= */
+(function(){
+ // Matching
+ const PAIRS=[['Fluoxetine','SSRI'],['Venlafaxine','SNRI'],['Diazepam','Benzodiazepine'],['Haloperidol','Chống loạn thần']];
+ const L=PAIRS.map((p,i)=>({t:p[0],i})), R=PAIRS.map((p,i)=>({t:p[1],i})).sort(()=>Math.random()-.5);
+ const mbox=document.getElementById('match'); let sel=null, matched=0;
+ function side(arr,side){return arr.map(o=>`<button class="opt" data-side="${side}" data-i="${o.i}" style="margin:4px 0;padding:8px 10px">${o.t}</button>`).join('');}
+ mbox.innerHTML=`<div>${side(L,'l')}</div><div>${side(R,'r')}</div>`;
+ mbox.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+   if(b.classList.contains('correct'))return;
+   if(!sel){sel=b;b.style.borderColor='var(--blue-mid)';return;}
+   if(sel===b){sel.style.borderColor='';sel=null;return;}
+   if(sel.dataset.i===b.dataset.i && sel.dataset.side!==b.dataset.side){
+     sel.classList.add('correct');b.classList.add('correct');sel.style.borderColor='';matched++;
+     document.getElementById('matchMsg').textContent=matched===4?'Ghép đúng tất cả ✓':`Đã ghép ${matched}/4`;
+   }else{const s=sel;s.classList.add('wrong');b.classList.add('wrong');setTimeout(()=>{s.classList.remove('wrong');b.classList.remove('wrong');s.style.borderColor='';},500);}
+   sel=null;
+ });
+
+ // Ordering
+ let STEPS=['Thu thập bệnh sử & triệu chứng','Đối chiếu tiêu chuẩn DSM/ICD','Loại trừ nguyên nhân y khoa','Đưa chẩn đoán sơ bộ & lập kế hoạch'];
+ let order=[3,1,0,2]; // shuffled indices into correct order 0..3
+ const obox=document.getElementById('order');
+ function renderOrder(){obox.innerHTML=order.map((s,pos)=>`<div class="sortrow"><span class="lbl">${pos+1}. ${STEPS[s]}</span><button class="pill-btn" data-d="up" data-p="${pos}">▲</button><button class="pill-btn" data-d="down" data-p="${pos}">▼</button></div>`).join('');
+  obox.querySelectorAll('button').forEach(b=>b.onclick=()=>{const p=+b.dataset.p;const np=b.dataset.d==='up'?p-1:p+1;if(np<0||np>=order.length)return;[order[p],order[np]]=[order[np],order[p]];renderOrder();});}
+ renderOrder();
+ document.getElementById('orderCheck').onclick=()=>{const ok=order.every((v,i)=>v===i);document.getElementById('orderMsg').innerHTML=ok?'<b style="color:var(--green-mid)">Chính xác ✓</b>':'Chưa đúng — gợi ý: bắt đầu từ thu thập bệnh sử.';};
+
+ // Slider
+ const sl=document.getElementById('slider');
+ sl.oninput=()=>{const v=+sl.value;document.getElementById('sval').textContent=v;
+   let m=document.getElementById('sliderMsg');
+   if(v>=10&&v<=19)m.innerHTML='<b style="color:var(--green-mid)">Đúng vùng "vừa–nặng" ✓</b>';
+   else if(v<10)m.textContent='Hơi thấp — ca này có ≥5 triệu chứng nặng.';
+   else m.textContent='Hơi cao cho mô tả hiện tại.';};
+
+ // Cloze
+ document.getElementById('clozeCheck').onclick=()=>{
+   const v=document.getElementById('cloze').value.trim().toLowerCase();
+   const ok=['tin cậy','tincậy','reliability','độ tin cậy'].includes(v);
+   document.getElementById('clozeMsg').innerHTML=ok?'<b style="color:var(--green-mid)">Chính xác: độ tin cậy ✓</b>':'Gợi ý: trái nghĩa với "thiếu nhất quán".';};
+
+ // Confidence MCQ
+ const COPTS=[['APA (Hoa Kỳ)',false],['WHO (Tổ chức Y tế Thế giới)',true],['FDA',false]];
+ let cans=null,clvl=null;
+ const cq=document.getElementById('confQ');
+ COPTS.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o[0];b.style.margin='4px 0';
+   b.onclick=()=>{cq.querySelectorAll('.opt').forEach(x=>x.style.borderColor='');b.style.borderColor='var(--blue-mid)';cans=i;chkC();};cq.appendChild(b);});
+ ['Thấp','Vừa','Cao'].forEach((t,i)=>{const b=document.createElement('button');b.className='pill-btn';b.textContent=t;
+   b.onclick=()=>{document.querySelectorAll('#confLvl .pill-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');clvl=i;chkC();};document.getElementById('confLvl').appendChild(b);});
+ function chkC(){document.getElementById('confSubmit').disabled=!(cans!==null&&clvl!==null);}
+ document.getElementById('confSubmit').onclick=()=>{
+   const correct=COPTS[cans][1];const m=document.getElementById('confMsg');
+   if(correct&&clvl===2)m.innerHTML='<b style="color:var(--green-mid)">Đúng & tự tin cao — hiệu chỉnh tốt ✓</b>';
+   else if(correct)m.innerHTML='Đúng rồi (WHO) — lần sau có thể tự tin hơn.';
+   else if(clvl===2)m.innerHTML='<b style="color:var(--red)">Sai nhưng rất tự tin — cảnh báo lệch hiệu chỉnh.</b> Đáp án: WHO.';
+   else m.innerHTML='Chưa đúng. Đáp án: WHO.';
+   document.getElementById('confSubmit').disabled=true;};
+
+ // Hotspot
+ document.getElementById('hs-front').onclick=()=>document.getElementById('hsMsg').innerHTML='<b style="color:var(--green-mid)">Chính xác — thùy trán (điều hành, ra quyết định) ✓</b>';
+ [['hs-occ','thùy chẩm (thị giác)'],['hs-temp','thùy thái dương (thính giác/trí nhớ)']].forEach(([id,n])=>{
+   document.getElementById(id).onclick=()=>document.getElementById('hsMsg').textContent='Đó là '+n+'. Thử lại vùng phía trước.';});
+})();
+</script>
+</body>
+</html>

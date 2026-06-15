@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BCH Tracker — Setup Guide</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --border: #e2e5ef;
+      --text: #1a1d2e;
+      --muted: #6b7280;
+      --accent: #6366f1;
+      --accent-lt: #eef2ff;
+      --green: #10b981;
+      --green-lt: #ecfdf5;
+      --amber: #f59e0b;
+      --amber-lt: #fffbeb;
+      --red: #ef4444;
+      --red-lt: #fef2f2;
+      --blue: #3b82f6;
+      --blue-lt: #eff6ff;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* ── Layout ── */
+    .page { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── Header ── */
+    .guide-header { text-align: center; margin-bottom: 3rem; }
+    .guide-logo { font-size: 2rem; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
+    .guide-title { font-size: 1.5rem; font-weight: 700; margin: .4rem 0 .5rem; }
+    .guide-sub { color: var(--muted); font-size: .9rem; max-width: 460px; margin: 0 auto; }
+
+    /* ── Progress bar ── */
+    .progress-wrap { background: var(--border); border-radius: 99px; height: 6px; margin: 1.5rem 0 2.5rem; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s ease; width: 0%; }
+    .progress-label { font-size: .78rem; color: var(--muted); text-align: right; margin-top: .3rem; }
+
+    /* ── Steps ── */
+    .step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; margin-bottom: 1rem;
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: box-shadow .2s;
+    }
+    .step.completed { border-color: var(--green); }
+    .step.completed .step-header { background: var(--green-lt); }
+    .step.warning { border-color: var(--amber); }
+
+    .step-header {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.25rem; cursor: pointer;
+      user-select: none; transition: background .15s;
+    }
+    .step-header:hover { background: var(--bg); }
+    .step.completed .step-header:hover { background: var(--green-lt); }
+
+    .step-num {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: var(--accent-lt); color: var(--accent);
+      font-weight: 800; font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step.completed .step-num { background: var(--green); color: #fff; }
+    .step.completed .step-num::after { content: '✓'; }
+    .step.completed .step-num-inner { display: none; }
+
+    .step-info { flex: 1; }
+    .step-title { font-weight: 700; font-size: .95rem; }
+    .step-meta  { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
+
+    .step-badge {
+      font-size: .7rem; font-weight: 700; padding: .2rem .55rem;
+      border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; flex-shrink: 0;
+    }
+    .badge-browser  { background: var(--blue-lt);   color: var(--blue); }
+    .badge-terminal { background: #1a1d2e;           color: #a3e635; }
+    .badge-notion   { background: #f3f0ec;           color: #37352f; }
+    .badge-github   { background: #24292e;           color: #fff; }
+
+    .step-chevron { color: var(--muted); font-size: .85rem; transition: transform .2s; flex-shrink: 0; }
+    .step.open .step-chevron { transform: rotate(90deg); }
+
+    .step-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); }
+    .step.open .step-body { display: block; }
+
+    /* ── Checkbox done button ── */
+    .done-btn {
+      display: flex; align-items: center; gap: .5rem; margin-top: 1.25rem;
+      padding: .6rem 1rem; border-radius: 8px; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer; font-size: .83rem; font-weight: 600;
+      color: var(--muted); transition: all .15s; font-family: var(--font); width: 100%;
+      justify-content: center;
+    }
+    .done-btn:hover { background: var(--green-lt); border-color: var(--green); color: var(--green); }
+    .step.completed .done-btn { background: var(--green-lt); border-color: var(--green); color: var(--green); }
+
+    /* ── Content elements ── */
+    .step-body h4 { font-size: .82rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--muted); margin: 1.1rem 0 .5rem; }
+    .step-body h4:first-child { margin-top: .9rem; }
+
+    .instruction { display: flex; gap: .75rem; align-items: flex-start; margin-bottom: .5rem; }
+    .instruction-num {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+      color: #fff; font-size: .72rem; font-weight: 800; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; margin-top: .1rem;
+    }
+    .instruction-text { font-size: .88rem; flex: 1; }
+    .instruction-text b { font-weight: 700; }
+    .instruction-text code {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; padding: .1rem .35rem; font-family: var(--mono); font-size: .82em;
+    }
+
+    /* ── Code blocks with copy button ── */
+    .code-block {
+      background: #1a1d2e; border-radius: 8px; margin: .75rem 0;
+      position: relative; overflow: hidden;
+    }
+    .code-block pre {
+      padding: .9rem 3.5rem .9rem 1rem; font-family: var(--mono);
+      font-size: .82rem; color: #e2e8f0; overflow-x: auto; line-height: 1.6;
+      white-space: pre;
+    }
+    .code-block pre .comment { color: #64748b; }
+    .code-block pre .cmd { color: #a3e635; }
+    .copy-btn {
+      position: absolute; top: .5rem; right: .5rem;
+      background: rgba(255,255,255,.1); border: none; border-radius: 6px;
+      color: #94a3b8; font-size: .72rem; font-weight: 600;
+      padding: .3rem .6rem; cursor: pointer; transition: all .15s;
+      font-family: var(--font);
+    }
+    .copy-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
+    .copy-btn.copied { background: var(--green); color: #fff; }
+
+    /* ── Info boxes ── */
+    .info-box {
+      border-radius: 8px; padding: .8rem 1rem; margin: .75rem 0;
+      font-size: .85rem; display: flex; gap: .6rem; align-items: flex-start;
+    }
+    .info-box.tip    { background: var(--blue-lt);  border-left: 3px solid var(--blue); }
+    .info-box.warn   { background: var(--amber-lt); border-left: 3px solid var(--amber); }
+    .info-box.danger { background: var(--red-lt);   border-left: 3px solid var(--red); }
+    .info-box.success{ background: var(--green-lt); border-left: 3px solid var(--green); }
+    .info-box-icon { font-size: 1rem; flex-shrink: 0; }
+    .info-box-text { flex: 1; }
+    .info-box-text b { font-weight: 700; display: block; margin-bottom: .2rem; }
+
+    /* ── Visual UI mockups ── */
+    .ui-mock {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: .75rem 1rem; margin: .75rem 0;
+      font-size: .82rem;
+    }
+    .ui-mock-label { font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin-bottom: .5rem; }
+    .ui-mock-row {
+      display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem;
+      border-radius: 6px; margin-bottom: .2rem;
+    }
+    .ui-mock-row.highlight { background: var(--accent-lt); font-weight: 600; color: var(--accent); }
+    .ui-mock-row.muted-row { color: var(--muted); }
+    .ui-mock-icon { font-size: .9rem; }
+
+    .menu-mock {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; box-shadow: var(--shadow-md);
+      padding: .4rem; width: 200px; font-size: .82rem; margin: .5rem 0;
+    }
+    .menu-item {
+      padding: .4rem .6rem; border-radius: 5px; display: flex;
+      align-items: center; gap: .5rem; color: var(--muted);
+    }
+    .menu-item.active { background: var(--accent-lt); color: var(--accent); font-weight: 600; }
+    .menu-divider { border: none; border-top: 1px solid var(--border); margin: .3rem 0; }
+
+    /* ── Secret table ── */
+    .secret-table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: .84rem; }
+    .secret-table th {
+      background: var(--bg); padding: .5rem .75rem; text-align: left;
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+      border-bottom: 2px solid var(--border);
+    }
+    .secret-table td { padding: .55rem .75rem; border-bottom: 1px solid var(--border); }
+    .secret-table td:first-child { font-family: var(--mono); font-weight: 700; font-size: .8rem; color: var(--accent); }
+    .secret-table td:last-child { color: var(--muted); font-style: italic; font-size: .82rem; }
+
+    /* ── Completion banner ── */
+    .complete-banner {
+      display: none; background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+      border-radius: 14px; padding: 2rem; text-align: center; color: #fff; margin-top: 2rem;
+    }
+    .complete-banner.visible { display: block; }
+    .complete-banner h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: .5rem; }
+    .complete-banner p { opacity: .85; font-size: .9rem; }
+
+    /* ── Sticky progress ── */
+    .sticky-progress {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: .65rem 1rem;
+      box-shadow: var(--shadow-md); font-size: .8rem;
+      display: flex; align-items: center; gap: .6rem; z-index: 99;
+    }
+    .sticky-pct { font-weight: 800; color: var(--accent); }
+    .sticky-label { color: var(--muted); }
+
+    a { color: var(--accent); }
+    @media (max-width: 560px) {
+      .page { padding: 1.25rem 1rem 4rem; }
+      .step-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="guide-header">
+    <div class="guide-logo">BCH</div>
+    <div class="guide-title">Tracker Setup Guide</div>
+    <div class="guide-sub">Both your MVP and tracker live in the same repo — follow each step in order and check it off when done.</div>
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0 of 8 steps complete</div>
+  </div>
+
+  <!-- Repo structure overview -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow)">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.85rem">📁 How your repo will be organised</div>
+    <div style="font-family:var(--mono);font-size:.82rem;line-height:2">
+      <div><span style="color:var(--accent);font-weight:700">BCH/</span> <span style="color:var(--muted);font-size:.75rem">(repo root)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── <span style="color:var(--text);font-weight:600">index.html</span> <span style="font-size:.73rem">← your existing MVP (untouched)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── README.md</div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── <span style="color:var(--accent);font-weight:700">tracker/</span></div>
+      <div style="padding-left:2.75rem;color:var(--muted)">├── <span style="color:var(--text)">index.html</span> <span style="font-size:.73rem">← tracker app</span></div>
+      <div style="padding-left:2.75rem;color:var(--muted)">├── setup-guide.html</div>
+      <div style="padding-left:2.75rem;color:var(--muted)">└── <span style="color:var(--text)">data/</span> <span style="font-size:.73rem">← Notion JSON written here</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">├── scripts/ <span style="font-size:.73rem">← sync scripts (repo root)</span></div>
+      <div style="padding-left:1.25rem;color:var(--muted)">└── .github/workflows/ <span style="font-size:.73rem">← GitHub Action (must be root)</span></div>
+    </div>
+    <div style="display:flex;gap:1.25rem;margin-top:1rem;flex-wrap:wrap">
+      <div style="background:var(--accent-lt);border-radius:8px;padding:.5rem .9rem;font-size:.78rem">
+        🌐 <b>MVP URL:</b> <code style="font-size:.78rem">zoom2408.github.io/BCH</code>
+      </div>
+      <div style="background:var(--green-lt);border-radius:8px;padding:.5rem .9rem;font-size:.78rem">
+        📊 <b>Tracker URL:</b> <code style="font-size:.78rem">zoom2408.github.io/BCH/tracker</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1 ══════════════════════════════════════════════════ -->
+  <div class="step open" id="step-1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <div class="step-num"><span class="step-num-inner">1</span></div>
+      <div class="step-info">
+        <div class="step-title">Create a Notion Integration</div>
+        <div class="step-meta">Get your secret token from Notion</div>
+      </div>
+      <span class="step-badge badge-browser">🌐 Browser</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <h4>What you'll do</h4>
+      <div class="info-box tip">
+        <span class="info-box-icon">💡</span>
+        <div class="info-box-text">A Notion Integration is like a "robot account" that can read your databases. You'll get a secret token that the sync script uses to authenticate.</div>
+      </div>
+
+      <h4>Instructions</h4>
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">Open <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> in your browser</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">Click <b>"+ New integration"</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">Name it <code>BCH Tracker</code> → click <b>Save</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Copy the <b>"Internal Integration Secret"</b> — it starts with <code>secret_...</code></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">5</div>
+        <div class="instruction-text">Paste it somewhere temporary (Notes app is fine) — you'll use it in Step 3</div>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-box-icon">⚠️</span>
+        <div class="info-box-text"><b>Keep it private</b> — treat this token like a password. Never paste it in a public place or commit it to GitHub.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(1)">✓ I have my secret token — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <div class="step-num"><span class="step-num-inner">2</span></div>
+      <div class="step-info">
+        <div class="step-title">Create a Parent Page in Notion</div>
+        <div class="step-meta">Where your 3 databases will live</div>
+      </div>
+      <span class="step-badge badge-notion">📝 Notion</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <h4>Instructions</h4>
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">In Notion, click <b>"+ New page"</b> in the left sidebar</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">Name it <code>BCH Workspace</code> (or any name you like)</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">
+          <b>Connect the integration:</b> Click the <code>···</code> menu (three dots, top-right corner of the page) → scroll to <b>Connections</b> → find <code>BCH Tracker</code> → click it
+        </div>
+      </div>
+
+      <div class="info-box danger">
+        <span class="info-box-icon">🚫</span>
+        <div class="info-box-text">
+          <b>Common mistake — this is NOT the Share button</b><br>
+          "Share → Invite" is for adding people to a page.<br>
+          Integrations use a different menu: <b>··· → Connections</b>.<br>
+          If you skip this, Step 3 will fail with a 400 error.
+        </div>
+      </div>
+
+      <h4>Where to find the Connections menu</h4>
+      <div class="ui-mock">
+        <div class="ui-mock-label">··· menu (top-right of page)</div>
+        <div class="menu-mock">
+          <div class="menu-item"><span class="menu-icon">✏️</span> Rename</div>
+          <div class="menu-item"><span class="menu-icon">🔗</span> Copy link</div>
+          <div class="menu-item"><span class="menu-icon">⭐</span> Add to Favorites</div>
+          <hr class="menu-divider">
+          <div class="menu-item"><span class="menu-icon">📤</span> Export</div>
+          <div class="menu-item active"><span class="menu-icon">🔌</span> <b>Connections ← click here</b></div>
+          <hr class="menu-divider">
+          <div class="menu-item"><span class="menu-icon">🗑️</span> Delete</div>
+        </div>
+      </div>
+
+      <div class="instruction" style="margin-top:.75rem">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Copy the page URL from your browser address bar — you'll paste it in Step 3</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(2)">✓ Page created and integration connected — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <div class="step-num"><span class="step-num-inner">3</span></div>
+      <div class="step-info">
+        <div class="step-title">Run the Setup Script</div>
+        <div class="step-meta">Auto-creates all 3 Notion databases</div>
+      </div>
+      <span class="step-badge badge-terminal">💻 Terminal</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <h4>Open Terminal</h4>
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">Press <code>Cmd + Space</code> → type <code>Terminal</code> → press <code>Enter</code></div>
+      </div>
+
+      <h4>Navigate to the tracker folder</h4>
+      <div class="code-block">
+        <pre><span class="cmd">cd</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker"</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'cd \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker\"')">Copy</button>
+      </div>
+      <div class="info-box tip">
+        <span class="info-box-icon">💡</span>
+        <div class="info-box-text">Confirm you're in the right folder — run <code>ls</code> and you should see <code>index.html</code> in the list.</div>
+      </div>
+
+      <h4>Run the setup script</h4>
+      <div class="code-block">
+        <pre><span class="cmd">python3</span> scripts/setup_notion_databases.py</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'python3 scripts/setup_notion_databases.py')">Copy</button>
+      </div>
+
+      <h4>What the script will ask you</h4>
+      <div class="ui-mock">
+        <div class="ui-mock-label">Terminal prompts — answer in order</div>
+        <div class="ui-mock-row highlight"><span class="ui-mock-icon">1️⃣</span> Paste your token (secret_...): &nbsp;<b>← paste your token from Step 1</b></div>
+        <div class="ui-mock-row highlight" style="margin-top:.35rem"><span class="ui-mock-icon">2️⃣</span> Page URL or ID: &nbsp;<b>← paste the Notion page URL from Step 2</b></div>
+      </div>
+
+      <h4>What success looks like</h4>
+      <div class="code-block">
+        <pre><span class="comment">  ✓ Token valid — workspace: Your Workspace
+  ✓ Integration can access the page ✓
+  ✓ Tasks created: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  ✓ Content Calendar created: xxxxxxxx-...
+  ✓ Product Roadmap created: xxxxxxxx-...
+
+Step 4 — Add These GitHub Secrets
+
+  Secret name          Value
+  ────────────────────────────────────────────────
+  NOTION_TOKEN         secret_abc123...
+  TASKS_DB_ID          xxxxxxxx-xxxx-xxxx-xxxx-xxxx
+  CONTENT_DB_ID        xxxxxxxx-xxxx-xxxx-xxxx-xxxx
+  ROADMAP_DB_ID        xxxxxxxx-xxxx-xxxx-xxxx-xxxx</span></pre>
+      </div>
+
+      <div class="info-box danger">
+        <span class="info-box-icon">🚫</span>
+        <div class="info-box-text">
+          <b>If you get: ✗ Page not found</b><br>
+          You skipped the Connections step. Go back to Notion → open the page → <b>··· → Connections → BCH Tracker</b> → re-run the script.
+        </div>
+      </div>
+
+      <div class="info-box tip">
+        <span class="info-box-icon">📋</span>
+        <div class="info-box-text"><b>Keep the Terminal window open</b> — you'll need to copy the 4 secret values printed at the end for Step 4.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(3)">✓ Script ran successfully and I can see the secret values — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <div class="step-num"><span class="step-num-inner">4</span></div>
+      <div class="step-info">
+        <div class="step-title">Add GitHub Secrets</div>
+        <div class="step-meta">So the sync workflow can access Notion</div>
+      </div>
+      <span class="step-badge badge-github">🐙 GitHub</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <div class="info-box tip">
+        <span class="info-box-icon">💡</span>
+        <div class="info-box-text">You need a GitHub account and an empty repo created first. If you don't have one yet, go to <a href="https://github.com/new" target="_blank">github.com/new</a> and create a repo named <code>bch-tracker</code>.</div>
+      </div>
+
+      <h4>Where to add secrets</h4>
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">Open your GitHub repo in the browser</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">Click <b>Settings</b> tab (top of repo page)</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">In the left sidebar → <b>Secrets and variables</b> → <b>Actions</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Click <b>"New repository secret"</b> — add all 4 secrets from the Terminal output, one at a time</div>
+      </div>
+
+      <h4>The 4 secrets to add</h4>
+      <table class="secret-table">
+        <tr><th>Secret name (exact)</th><th>Value (from Terminal)</th></tr>
+        <tr><td>NOTION_TOKEN</td><td>starts with secret_...</td></tr>
+        <tr><td>TASKS_DB_ID</td><td>UUID printed after "Tasks created"</td></tr>
+        <tr><td>CONTENT_DB_ID</td><td>UUID printed after "Content Calendar created"</td></tr>
+        <tr><td>ROADMAP_DB_ID</td><td>UUID printed after "Product Roadmap created"</td></tr>
+      </table>
+
+      <div class="info-box warn">
+        <span class="info-box-icon">⚠️</span>
+        <div class="info-box-text">Secret names are case-sensitive. Type them exactly as shown — <code>NOTION_TOKEN</code> not <code>notion_token</code>.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(4)">✓ All 4 secrets added to GitHub — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-5">
+    <div class="step-header" onclick="toggleStep(5)">
+      <div class="step-num"><span class="step-num-inner">5</span></div>
+      <div class="step-info">
+        <div class="step-title">Add Tracker to Your Existing Repo</div>
+        <div class="step-meta">Clone BCH, copy files in, push — MVP stays untouched</div>
+      </div>
+      <span class="step-badge badge-terminal">💻 Terminal</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <div class="info-box tip">
+        <span class="info-box-icon">💡</span>
+        <div class="info-box-text">You already have a repo at <b>github.com/zoom2408/BCH</b>. We'll clone it, add the tracker files inside a <code>tracker/</code> subfolder, and push. Your existing MVP is not touched.</div>
+      </div>
+
+      <h4>① Clone your existing repo</h4>
+      <div class="code-block">
+        <pre><span class="cmd">cd</span> ~/Desktop
+<span class="cmd">git</span> clone https://github.com/zoom2408/BCH.git BCH-repo
+<span class="cmd">cd</span> BCH-repo</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'cd ~/Desktop\ngit clone https://github.com/zoom2408/BCH.git BCH-repo\ncd BCH-repo')">Copy</button>
+      </div>
+
+      <h4>② Create the tracker subfolder and copy files</h4>
+      <div class="code-block">
+        <pre><span class="comment"># Create the tracker/ subfolder</span>
+<span class="cmd">mkdir</span> -p tracker/data
+
+<span class="comment"># Copy tracker HTML and data files into tracker/</span>
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/index.html" tracker/
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/setup-guide.html" tracker/
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/data/"*.json tracker/data/
+
+<span class="comment"># Copy scripts and .github to repo root (needed for GitHub Action)</span>
+<span class="cmd">cp</span> -R "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts" .
+<span class="cmd">cp</span> -R "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.github" .
+<span class="cmd">cp</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.gitignore" .</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'mkdir -p tracker/data\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/index.html\" tracker/\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/setup-guide.html\" tracker/\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/data/\"*.json tracker/data/\ncp -R \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts\" .\ncp -R \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.github\" .\ncp \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/.gitignore\" .')">Copy</button>
+      </div>
+
+      <h4>③ Confirm the structure looks right</h4>
+      <div class="code-block">
+        <pre><span class="cmd">ls</span> -la          <span class="comment"># should show: tracker/ scripts/ .github/ .gitignore + your existing files</span>
+<span class="cmd">ls</span> tracker/     <span class="comment"># should show: index.html  setup-guide.html  data/</span>
+<span class="cmd">ls</span> tracker/data <span class="comment"># should show: tasks.json  content.json  roadmap.json</span></pre>
+        <button class="copy-btn" onclick="copyCode(this, 'ls -la\nls tracker/\nls tracker/data')">Copy</button>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-box-icon">⚠️</span>
+        <div class="info-box-text"><b>If <code>ls -la</code> does NOT show your existing MVP file</b> — that's fine, it might be named <code>index.html</code> at the root. Check with <code>ls</code> and confirm it's there before pushing.</div>
+      </div>
+
+      <h4>④ Commit and push</h4>
+      <div class="code-block">
+        <pre><span class="cmd">git</span> add .
+<span class="cmd">git</span> commit -m "add: BCH tracker in tracker/ subfolder"
+<span class="cmd">git</span> push</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'git add .\ngit commit -m \"add: BCH tracker in tracker/ subfolder\"\ngit push')">Copy</button>
+      </div>
+
+      <div class="info-box tip">
+        <span class="info-box-icon">💡</span>
+        <div class="info-box-text">If prompted for a GitHub password, use a <b>Personal Access Token</b> — not your account password. Create one at <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> with <code>repo</code> scope checked.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(5)">✓ Files pushed — I can see tracker/ in the GitHub repo — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-6">
+    <div class="step-header" onclick="toggleStep(6)">
+      <div class="step-num"><span class="step-num-inner">6</span></div>
+      <div class="step-info">
+        <div class="step-title">Enable GitHub Pages</div>
+        <div class="step-meta">Makes your tracker accessible at a public URL</div>
+      </div>
+      <span class="step-badge badge-github">🐙 GitHub</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">Open your GitHub repo → click the <b>Settings</b> tab</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">Scroll down the left sidebar → click <b>Pages</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">Under <b>Source</b> → select <b>"Deploy from a branch"</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Branch: <code>main</code> &nbsp;·&nbsp; Folder: <code>/ (root)</code> → click <b>Save</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">5</div>
+        <div class="instruction-text">Wait ~1 minute → refresh the page — your URL appears at the top:<br><code>https://YOUR_USERNAME.github.io/YOUR_REPO</code></div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(6)">✓ GitHub Pages enabled and URL is visible — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 7 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-7">
+    <div class="step-header" onclick="toggleStep(7)">
+      <div class="step-num"><span class="step-num-inner">7</span></div>
+      <div class="step-info">
+        <div class="step-title">Run the First Sync</div>
+        <div class="step-meta">Pull Notion data into your tracker for the first time</div>
+      </div>
+      <span class="step-badge badge-github">🐙 GitHub</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">In your GitHub repo, click the <b>Actions</b> tab</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">In the left list, click <b>"Sync Notion → JSON"</b></div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">Click the <b>"Run workflow"</b> dropdown → click the green <b>"Run workflow"</b> button</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Wait ~30 seconds → a green checkmark ✓ means it worked</div>
+      </div>
+
+      <div class="info-box success">
+        <span class="info-box-icon">✅</span>
+        <div class="info-box-text"><b>After this, syncing is automatic</b> — the workflow runs every 30 minutes on its own. You can also trigger it manually any time.</div>
+      </div>
+
+      <div class="info-box warn">
+        <span class="info-box-icon">⚠️</span>
+        <div class="info-box-text"><b>If the workflow fails (red ✗):</b> click into the run → expand the failing step — the most common cause is a missing or misspelled GitHub Secret from Step 4.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(7)">✓ First sync ran successfully — mark done</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 8 ══════════════════════════════════════════════════ -->
+  <div class="step" id="step-8">
+    <div class="step-header" onclick="toggleStep(8)">
+      <div class="step-num"><span class="step-num-inner">8</span></div>
+      <div class="step-info">
+        <div class="step-title">Open Your Tracker</div>
+        <div class="step-meta">Change the passphrase, then go live</div>
+      </div>
+      <span class="step-badge badge-browser">🌐 Browser</span>
+      <span class="step-chevron">▶</span>
+    </div>
+    <div class="step-body">
+      <h4>Change the passphrase first (optional but recommended)</h4>
+      <div class="instruction">
+        <div class="instruction-num">1</div>
+        <div class="instruction-text">Open <code>~/Desktop/BCH-repo/tracker/index.html</code> in any text editor (TextEdit, VS Code, etc.)</div>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">2</div>
+        <div class="instruction-text">Find line ~313 — change <code>"bch2024"</code> to your own passphrase</div>
+      </div>
+      <div class="code-block">
+        <pre><span class="comment">// Before:</span>
+  password: <span style="color:#fbbf24">"bch2024"</span>,
+
+<span class="comment">// After (use your own):</span>
+  password: <span style="color:#86efac">"your-new-passphrase"</span>,</pre>
+      </div>
+      <div class="instruction">
+        <div class="instruction-num">3</div>
+        <div class="instruction-text">Save the file, then in Terminal push the change:</div>
+      </div>
+      <div class="code-block">
+        <pre><span class="cmd">cd</span> ~/Desktop/BCH-repo
+<span class="cmd">git</span> add tracker/index.html
+<span class="cmd">git</span> commit -m "update passphrase"
+<span class="cmd">git</span> push</pre>
+        <button class="copy-btn" onclick="copyCode(this, 'cd ~/Desktop/BCH-repo\ngit add tracker/index.html\ngit commit -m \"update passphrase\"\ngit push')">Copy</button>
+      </div>
+
+      <h4>Open the tracker</h4>
+      <div class="instruction">
+        <div class="instruction-num">4</div>
+        <div class="instruction-text">Your <b>two URLs</b> are now live:</div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin:.75rem 0 .75rem 2rem">
+        <div style="background:var(--accent-lt);border-radius:8px;padding:.6rem 1rem;font-size:.85rem">
+          🌐 <b>MVP:</b> <a href="https://zoom2408.github.io/BCH" target="_blank">zoom2408.github.io/BCH</a>
+        </div>
+        <div style="background:var(--green-lt);border-radius:8px;padding:.6rem 1rem;font-size:.85rem">
+          📊 <b>Tracker:</b> <a href="https://zoom2408.github.io/BCH/tracker" target="_blank">zoom2408.github.io/BCH/tracker</a>
+        </div>
+      </div>
+
+      <div class="instruction">
+        <div class="instruction-num">5</div>
+        <div class="instruction-text">Open the Tracker URL → enter your passphrase → you should see your Notion data in Dashboard, Kanban, and Calendar views</div>
+      </div>
+
+      <div class="info-box success">
+        <span class="info-box-icon">🎉</span>
+        <div class="info-box-text"><b>You're live!</b> Both pages are up. Sync runs every 30 min automatically — add items in Notion and they appear in the tracker within 30 minutes.</div>
+      </div>
+
+      <button class="done-btn" onclick="markDone(8)">✓ Tracker is live and working — mark done!</button>
+    </div>
+  </div>
+
+  <!-- ══ TROUBLESHOOTING ══════════════════════════════════════════ -->
+  <div style="margin-top:2rem">
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.75rem">🔧 Troubleshooting</div>
+
+    <!-- T1: Tracker shows 0 items -->
+    <div class="step warning" id="trouble-1">
+      <div class="step-header" onclick="toggleTrouble(1)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Tracker shows 0 items / dashboard is empty</div>
+          <div class="step-meta">Sync ran (green ✓) but data/<em>x</em>.json has <code>"total": 0, "items": []</code></div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <div class="info-box warn">
+          <span class="info-box-icon">⚠️</span>
+          <div class="info-box-text"><b>Root cause:</b> The DB ID saved in GitHub Secrets is pointing to the wrong database (or the parent page instead of the database itself). The API connects fine but returns 0 rows.</div>
+        </div>
+
+        <h4>Step 1 — Get the correct DB ID from Notion</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Open the database in Notion — click <b>into the Tasks database itself</b> (not just the parent page)</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Look at the browser URL bar. It will look like one of these:</div>
+        </div>
+
+        <div class="code-block">
+          <pre><span class="comment"># Format 1 — long URL with page name:</span>
+https://www.notion.so/Tasks-<span style="color:#fbbf24">b36f625eaddd1815695b8e3fd8fb9f23</span>
+                              <span style="color:#a3e635">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+                              <span style="color:#a3e635">← this 32-char string is your DB ID</span>
+
+<span class="comment"># Format 2 — just the ID:</span>
+https://www.notion.so/<span style="color:#fbbf24">b36f625e-addd-1815-695b-8e3fd8fb9f23</span></pre>
+        </div>
+
+        <div class="instruction">
+          <div class="instruction-num">3</div>
+          <div class="instruction-text">Copy the <b>32 characters after the last <code>-</code> before any <code>?</code></b>. Dashes are optional — both formats work.</div>
+        </div>
+
+        <div class="info-box danger">
+          <span class="info-box-icon">🚫</span>
+          <div class="info-box-text">
+            <b>Don't copy the parent page URL.</b> The parent page (e.g. "BCH Workspace") has its own ID — it's NOT the database ID. Make sure the URL says the database name (Tasks, Content Calendar, Roadmap) in the browser tab before copying.
+          </div>
+        </div>
+
+        <h4>Step 2 — Verify with a quick Terminal test</h4>
+        <div class="info-box tip">
+          <span class="info-box-icon">💡</span>
+          <div class="info-box-text">Run this to confirm the ID is correct before updating GitHub. Replace the values with yours.</div>
+        </div>
+        <div class="code-block">
+          <pre><span class="cmd">NOTION_TOKEN</span>="secret_xxx" <span class="cmd">TASKS_DB_ID</span>="your-db-id" python3 -c "
+import urllib.request, json, os
+t = os.environ['NOTION_TOKEN']
+d = os.environ['TASKS_DB_ID']
+req = urllib.request.Request(
+    f'https://api.notion.com/v1/databases/{d}/query',
+    data=b'{}',
+    headers={'Authorization': f'Bearer {t}',
+             'Notion-Version': '2022-06-28',
+             'Content-Type': 'application/json'},
+    method='POST'
+)
+with urllib.request.urlopen(req) as r:
+    data = json.loads(r.read())
+    print(f'Found {len(data[\"results\"])} rows')
+"</pre>
+          <button class="copy-btn" onclick="copyCode(this, 'NOTION_TOKEN=\"secret_xxx\" TASKS_DB_ID=\"your-db-id\" python3 -c \"\nimport urllib.request, json, os\nt = os.environ[\'NOTION_TOKEN\']\nd = os.environ[\'TASKS_DB_ID\']\nreq = urllib.request.Request(\n    f\'https://api.notion.com/v1/databases/{d}/query\',\n    data=b\'{}\',\n    headers={\'Authorization\': f\'Bearer {t}\', \'Notion-Version\': \'2022-06-28\', \'Content-Type\': \'application/json\'},\n    method=\'POST\'\n)\nwith urllib.request.urlopen(req) as r:\n    data = json.loads(r.read())\n    print(f\'Found {len(data[\"results\"])} rows\')\n\"')">Copy</button>
+        </div>
+        <div class="ui-mock">
+          <div class="ui-mock-label">Expected output</div>
+          <div class="ui-mock-row highlight">Found 3 rows &nbsp;← ✓ correct ID</div>
+          <div class="ui-mock-row muted-row" style="margin-top:.3rem">Found 0 rows &nbsp;← ✗ wrong ID or integration not connected</div>
+        </div>
+
+        <h4>Step 3 — Update the GitHub Secret</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to your GitHub repo → <b>Settings → Secrets and variables → Actions</b></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Click the secret name (e.g. <code>TASKS_DB_ID</code>) → click <b>"Update"</b> → paste the correct ID → save</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">3</div>
+          <div class="instruction-text">Repeat for <code>CONTENT_DB_ID</code> and <code>ROADMAP_DB_ID</code> if needed</div>
+        </div>
+
+        <h4>Step 4 — Also check the database integration connection</h4>
+        <div class="info-box tip">
+          <span class="info-box-icon">💡</span>
+          <div class="info-box-text">Each <b>database</b> needs to have the integration connected separately — not just the parent page. Open each database → <b>··· → Connections → BCH Tracker</b>. Do this for all 3.</div>
+        </div>
+
+        <h4>Step 5 — Re-run the sync</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">GitHub repo → <b>Actions</b> tab → "Sync Notion → JSON" → <b>Run workflow</b></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">After it completes (green ✓), open <code>tracker/data/tasks.json</code> in the repo — <code>"total"</code> should now be greater than 0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T2: Integration not connected -->
+    <div class="step warning" id="trouble-2" style="margin-top:.75rem">
+      <div class="step-header" onclick="toggleTrouble(2)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Script fails with HTTP 400 / "page not found"</div>
+          <div class="step-meta">setup_notion_databases.py returns a validation error</div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <div class="info-box danger">
+          <span class="info-box-icon">🚫</span>
+          <div class="info-box-text"><b>Cause:</b> The integration is not connected to the parent page. You connected via Share → Invite instead of <b>··· → Connections</b>.</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to your Notion parent page → click <b>···</b> (top right) → <b>Connections</b> → click <b>BCH Tracker</b> to connect it</div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Re-run: <code>python3 scripts/setup_notion_databases.py</code></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T3: Token lost -->
+    <div class="step warning" id="trouble-3" style="margin-top:.75rem">
+      <div class="step-header" onclick="toggleTrouble(3)">
+        <div class="step-num" style="background:var(--amber-lt);color:var(--amber)"><span class="step-num-inner">!</span></div>
+        <div class="step-info">
+          <div class="step-title">Lost your NOTION_TOKEN / DB IDs after closing Terminal</div>
+          <div class="step-meta">Where to find them again without re-running the setup script</div>
+        </div>
+        <span class="step-chevron">▶</span>
+      </div>
+      <div class="step-body">
+        <h4>Recover NOTION_TOKEN</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Go to <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a></div>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text">Click <b>BCH Tracker</b> → click <b>"Show"</b> next to the token field → copy it</div>
+        </div>
+        <div class="info-box warn">
+          <span class="info-box-icon">⚠️</span>
+          <div class="info-box-text">If you've lost the token and can't recover it, click <b>"Regenerate"</b> to get a new one — then update the <code>NOTION_TOKEN</code> GitHub Secret with the new value.</div>
+        </div>
+
+        <h4>Recover DB IDs</h4>
+        <div class="instruction">
+          <div class="instruction-num">1</div>
+          <div class="instruction-text">Open the setup script output file: <code>tracker/scripts/.env.notion</code> — the IDs were saved there automatically when you ran the script</div>
+        </div>
+        <div class="code-block">
+          <pre><span class="cmd">cat</span> "/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts/.env.notion"</pre>
+          <button class="copy-btn" onclick="copyCode(this, 'cat \"/Users/zoom09/Documents/Claude/Projects/BCH/tracker/scripts/.env.notion\"')">Copy</button>
+        </div>
+        <div class="instruction">
+          <div class="instruction-num">2</div>
+          <div class="instruction-text"><b>Or</b> get each ID directly from Notion: open the database → copy the 32-char ID from the URL (see the "0 items" troubleshooting section above)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion banner -->
+  <div class="complete-banner" id="complete-banner">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🎉</div>
+    <h2>Setup Complete!</h2>
+    <p>Your BCH Tracker is live. Data syncs from Notion every 30 minutes automatically.</p>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Sticky progress indicator -->
+<div class="sticky-progress" id="sticky-progress">
+  <span class="sticky-pct" id="sticky-pct">0%</span>
+  <span class="sticky-label" id="sticky-label">0 / 8 steps done</span>
+</div>
+
+<script>
+  const TOTAL = 8;
+  const state = JSON.parse(localStorage.getItem('bch-guide') || '{}');
+
+  function save() { localStorage.setItem('bch-guide', JSON.stringify(state)); }
+
+  function updateProgress() {
+    const done = Object.values(state).filter(Boolean).length;
+    const pct  = Math.round(done / TOTAL * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = `${done} of ${TOTAL} steps complete`;
+    document.getElementById('sticky-pct').textContent = pct + '%';
+    document.getElementById('sticky-label').textContent = `${done} / ${TOTAL} steps done`;
+    if (done === TOTAL) document.getElementById('complete-banner').classList.add('visible');
+  }
+
+  function markDone(n) {
+    state[n] = true;
+    save();
+    const step = document.getElementById('step-' + n);
+    step.classList.add('completed');
+    step.classList.remove('open');
+    // Auto-open next step
+    const next = document.getElementById('step-' + (n + 1));
+    if (next && !state[n + 1]) {
+      next.classList.add('open');
+      next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    updateProgress();
+  }
+
+  function toggleStep(n) {
+    const step = document.getElementById('step-' + n);
+    step.classList.toggle('open');
+  }
+
+  function copyCode(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  function toggleTrouble(n) {
+    const el = document.getElementById('trouble-' + n);
+    el.classList.toggle('open');
+  }
+
+  // Restore state on load
+  (function init() {
+    for (let n = 1; n <= TOTAL; n++) {
+      if (state[n]) {
+        const step = document.getElementById('step-' + n);
+        step.classList.add('completed');
+        step.classList.remove('open');
+      }
+    }
+    // Open the first incomplete step
+    for (let n = 1; n <= TOTAL; n++) {
+      if (!state[n]) {
+        document.getElementById('step-' + n).classList.add('open');
+        break;
+      }
+    }
+    updateProgress();
+  })();
+</script>
+</body>
+</html>

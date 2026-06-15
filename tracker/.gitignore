@@ -1,0 +1,12 @@
+# Never commit these
+.env*
+*.env
+.env.notion
+token.js
+**/token.js
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
